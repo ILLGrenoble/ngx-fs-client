@@ -42,6 +42,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             takeUntil(this._destroy$),
             switchMap(path => {
                 this.directoryContentLoading$.next(true);
+                this.path$.next(path.name);
                 return this._fileSystemService.getDirectoryContent(path.name).pipe(
                     takeUntil(this._destroy$),
                     finalize(() => this.directoryContentLoading$.next(false))

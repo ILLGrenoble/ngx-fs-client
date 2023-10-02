@@ -2,11 +2,9 @@
     <div *ngIf="directoryContentLoading$ | async" class="visa-fs-files-icon-view-loading">
         <mat-spinner></mat-spinner>
     </div>
-    <div *ngIf="!(directoryContentLoading$ | async)">
-        <div class="visa-fs-files-icon-view-contents">
-            <div *ngFor="let item of items; ">
-                <file-icon-view [fileStats]="item" [fileSelectedListener$]="fileSelectedListener$"></file-icon-view>
-            </div>
+    <div *ngIf="!(directoryContentLoading$ | async)" class="visa-fs-files-icon-view-contents">
+        <div *ngFor="let item of items; ">
+            <file-icon-view [fileStats]="item" [fileSelectedListener$]="fileSelectedListener$"></file-icon-view>
         </div>
     </div>
 </div>

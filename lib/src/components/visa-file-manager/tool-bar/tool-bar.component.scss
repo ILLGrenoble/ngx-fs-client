@@ -7,11 +7,9 @@
     flex-direction: row;
     justify-content: flex-start;
     align-content: center;
-    column-gap: 16px;
 }
 
 .visa-fs-tool-bar-path-navigation-button {
-    width: 32px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -19,6 +17,7 @@
 }
 
 .visa-fs-tool-bar-folder-name {
+    margin-left: 16px;
     line-height: 50px;
     text-align: start;
     font-size: 1.3em;
