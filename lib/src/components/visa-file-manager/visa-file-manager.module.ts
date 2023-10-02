@@ -2,19 +2,25 @@ import { NgModule } from '@angular/core';
 import { VisaFileManagerComponent } from './visa-file-manager.component';
 import { ToolBarComponent } from './tool-bar';
 import { PathBarComponent } from './path-bar';
-import { FilesIconViewComponent } from './files-icon-view';
-import { AsyncPipe } from '@angular/common';
-
+import { FileIconViewComponent, FilesIconViewComponent } from './files-icon-view';
+import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
     declarations: [
         VisaFileManagerComponent,
         ToolBarComponent,
         PathBarComponent,
-        FilesIconViewComponent
+        FilesIconViewComponent,
+        FileIconViewComponent,
     ],
     imports: [
-        AsyncPipe
+        AsyncPipe,
+        NgForOf,
+        NgIf,
+        MatIconModule,
+        MatProgressSpinnerModule
     ],
     providers: [],
     exports: [

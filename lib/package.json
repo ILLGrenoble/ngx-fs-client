@@ -6,6 +6,7 @@
         "@angular/core": "^16.0.0"
     },
     "dependencies": {
+        "@angular/material": "^16.2.6",
         "tslib": "^2.3.0"
     },
     "sideEffects": false

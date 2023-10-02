@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject, Subject, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, finalize, Subject, switchMap, takeUntil } from 'rxjs';
 import { VisaFileSystemService } from '../../services';
 import { DirectoryContent } from '../../models';
 
@@ -12,10 +12,13 @@ import { DirectoryContent } from '../../models';
 export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     @Output()
-    path$: BehaviorSubject<string> = new BehaviorSubject<string>('Desktop/test2');
+    path$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
     @Output()
     directoryContent$: BehaviorSubject<DirectoryContent> = new BehaviorSubject<DirectoryContent>(null);
+
+    @Output()
+    directoryContentLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     private _destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -26,13 +29,14 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         this.path$.pipe(
             takeUntil(this._destroy$),
             switchMap(path => {
+                this.directoryContentLoading$.next(true);
                 return this._fileSystemService.getDirectoryContent(path).pipe(
-                    takeUntil(this._destroy$)
+                    takeUntil(this._destroy$),
+                    finalize(() => this.directoryContentLoading$.next(false))
                 )
             })).subscribe({
                 next: (content) => {
                     this.directoryContent$.next(content);
-                    console.log(JSON.stringify(content))
                 },
                 error: (error) => {
                     console.error(error);

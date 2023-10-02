@@ -1,0 +1,24 @@
+
+.visa-fs-files-icon-view-container {
+    background-color: #fff;
+    height: 398px;
+}
+
+.visa-fs-files-icon-view-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.visa-fs-files-icon-view-contents {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    max-height: 398px;
+    height: 100%;
+    overflow-y: auto;
+}

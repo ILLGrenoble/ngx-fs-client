@@ -1,0 +1,13 @@
+<div class="visa-fs-file-icon-view-container">
+    <div class="visa-fs-file-icon-view-inner" (dblclick)="onDoubleClicked()">
+
+        <div class="visa-fs-file-icon-view-icon">
+            <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
+            <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
+        </div>
+
+        <div class="visa-fs-file-icon-view-name">
+            {{ fileStats.name }}
+        </div>
+    </div>
+</div>

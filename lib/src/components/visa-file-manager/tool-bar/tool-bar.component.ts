@@ -4,9 +4,10 @@ import { BehaviorSubject, map, Observable } from 'rxjs';
 @Component({
     selector: 'tool-bar',
     templateUrl: './tool-bar.component.html',
+    styleUrls: ['./tool-bar.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class ToolBarComponent implements  OnInit {
+export class ToolBarComponent implements OnInit {
 
     @Input()
     path$: Observable<string>;
@@ -18,7 +19,13 @@ export class ToolBarComponent implements  OnInit {
     }
 
     ngOnInit() {
-        this.path$.subscribe(path => this._basename$.next(path.split('/').pop()));
+        this.path$.subscribe(path => {
+            let basename = path.split('/').pop();
+            if (basename === ''){
+                basename = 'Home';
+            }
+            this._basename$.next(basename);
+        });
     }
 
 }
