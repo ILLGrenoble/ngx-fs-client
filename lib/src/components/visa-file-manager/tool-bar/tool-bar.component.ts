@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { LinkedPath } from '../../../models/linked-path.model';
 
 @Component({
     selector: 'tool-bar',
@@ -10,7 +11,7 @@ import { BehaviorSubject, map, Observable } from 'rxjs';
 export class ToolBarComponent implements OnInit {
 
     @Input()
-    path$: Observable<string>;
+    linkedPath$: BehaviorSubject<LinkedPath>;
 
     private _basename$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
@@ -19,13 +20,26 @@ export class ToolBarComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.path$.subscribe(path => {
+        this.linkedPath$.subscribe(linkedPath => {
+            const path = linkedPath.name;
             let basename = path.split('/').pop();
             if (basename === ''){
                 basename = 'Home';
             }
             this._basename$.next(basename);
         });
+    }
+
+    onBackClick(): void {
+        if (this.linkedPath$.getValue().previous) {
+            this.linkedPath$.next(this.linkedPath$.getValue().previous)
+        }
+    }
+
+    onForwardClick(): void {
+        if (this.linkedPath$.getValue().next) {
+            this.linkedPath$.next(this.linkedPath$.getValue().next)
+        }
     }
 
 }

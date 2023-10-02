@@ -6,6 +6,7 @@ import { FileIconViewComponent, FilesIconViewComponent } from './files-icon-view
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
     declarations: [
@@ -20,7 +21,8 @@ import { MatIconModule } from '@angular/material/icon';
         NgForOf,
         NgIf,
         MatIconModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatButtonModule,
     ],
     providers: [],
     exports: [

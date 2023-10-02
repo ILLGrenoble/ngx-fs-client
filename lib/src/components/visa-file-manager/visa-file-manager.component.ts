@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { BehaviorSubject, finalize, Subject, switchMap, takeUntil } from 'rxjs';
 import { VisaFileSystemService } from '../../services';
-import { DirectoryContent } from '../../models';
+import { DirectoryContent, LinkedPath } from '../../models';
 
 @Component({
     selector: 'visa-file-manager',
@@ -15,6 +15,9 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     path$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
     @Output()
+    linkedPath$: BehaviorSubject<LinkedPath> = new BehaviorSubject<LinkedPath>(new LinkedPath({name: ''}));
+
+    @Output()
     directoryContent$: BehaviorSubject<DirectoryContent> = new BehaviorSubject<DirectoryContent>(null);
 
     @Output()
@@ -26,22 +29,31 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.path$.pipe(
+        this.path$.subscribe(path => {
+            const currentPath = this.linkedPath$.getValue();
+            if (currentPath.name !== path) {
+                const linkedPath = new LinkedPath({name: path, previous: currentPath});
+                currentPath.next = linkedPath;
+                this.linkedPath$.next(linkedPath);
+            }
+        });
+
+        this.linkedPath$.pipe(
             takeUntil(this._destroy$),
             switchMap(path => {
                 this.directoryContentLoading$.next(true);
-                return this._fileSystemService.getDirectoryContent(path).pipe(
+                return this._fileSystemService.getDirectoryContent(path.name).pipe(
                     takeUntil(this._destroy$),
                     finalize(() => this.directoryContentLoading$.next(false))
                 )
             })).subscribe({
-                next: (content) => {
-                    this.directoryContent$.next(content);
-                },
-                error: (error) => {
-                    console.error(error);
-                }
-            });
+            next: (content) => {
+                this.directoryContent$.next(content);
+            },
+            error: (error) => {
+                console.error(error);
+            }
+        });
 
     }
 

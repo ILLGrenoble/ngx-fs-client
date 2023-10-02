@@ -1,4 +1,14 @@
 <div class="visa-fs-tool-bar-container">
+    <div class="visa-fs-tool-bar-path-navigation-button">
+        <button mat-icon-button [disabled]="(linkedPath$ | async)?.previous == null" (click)="onBackClick()">
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+    </div>
+    <div class="visa-fs-tool-bar-path-navigation-button">
+        <button mat-icon-button [disabled]="(linkedPath$ | async)?.next ==null" (click)="onForwardClick()">
+            <mat-icon>arrow_forward</mat-icon>
+        </button>
+    </div>
     <div class="visa-fs-tool-bar-folder-name">
         {{ basename$ | async }}
     </div>

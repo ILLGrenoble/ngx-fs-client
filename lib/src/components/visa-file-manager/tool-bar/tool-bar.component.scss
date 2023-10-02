@@ -3,6 +3,19 @@
     height: 50px;
     background-color: #f4f4f4;
     border-bottom: 1px solid #ccc;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-content: center;
+    column-gap: 16px;
+}
+
+.visa-fs-tool-bar-path-navigation-button {
+    width: 32px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 .visa-fs-tool-bar-folder-name {
@@ -11,5 +24,4 @@
     font-size: 1.3em;
     font-weight: 400;
     color: #000;
-    margin-left: 16px;
 }
