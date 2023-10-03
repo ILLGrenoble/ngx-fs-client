@@ -13,10 +13,10 @@ export class FileIconViewComponent {
     fileStats: FileStats;
 
     @Input()
-    fileSelectedListener$: Subject<FileStats>;
+    fileDoubleClickedListener$: Subject<FileStats>;
 
     onDoubleClicked(): void {
-        this.fileSelectedListener$.next(this.fileStats);
+        this.fileDoubleClickedListener$.next(this.fileStats);
     }
 
 }

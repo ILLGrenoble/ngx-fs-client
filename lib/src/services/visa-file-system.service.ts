@@ -25,4 +25,18 @@ export class VisaFileSystemService {
             })
         );
     }
+
+    public downloadFile(path: string): Observable<FileContent> {
+        const uriEncodedPath = encodeURI(path);
+        const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
+        return this._http.get<FileContent | DirectoryContent>(apiPath).pipe(
+            concatMap(data => {
+                if (data.stats.type !== 'file') {
+                    return throwError(() => new Error(`Path is not a file`));
+                } else {
+                    return of(data as FileContent);
+                }
+            })
+        );
+    }
 }

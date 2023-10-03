@@ -21,12 +21,18 @@ export class FilesIconViewComponent implements OnInit {
     @Input()
     directoryContentLoading$: BehaviorSubject<boolean>;
 
-    fileSelectedListener$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+    @Input()
+    downloadFile$: BehaviorSubject<string>;
+
+    fileDoubleClickedListener$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
     private _items: FileStats[] = [];
 
     get items(): FileStats[] {
         return this._items;
+    }
+
+    constructor() {
     }
 
     ngOnInit() {
@@ -42,14 +48,14 @@ export class FilesIconViewComponent implements OnInit {
                 })
         });
 
-        this.fileSelectedListener$.pipe(
+        this.fileDoubleClickedListener$.pipe(
             filter(fileStats => fileStats != null)
         ).subscribe(fileStats => {
             if (fileStats.type === 'directory') {
                 this.path$.next(fileStats.path);
 
             } else {
-
+                this.downloadFile$.next(fileStats.path)
             }
         })
     }

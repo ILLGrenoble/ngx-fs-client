@@ -19,6 +19,11 @@
     justify-content: flex-start;
     align-items: center;
     cursor: pointer;
+    border-radius: 4px;
+
+    &:hover {
+        background-color: #f4f4f4;
+    }
 }
 
 .visa-fs-file-icon-view-icon {

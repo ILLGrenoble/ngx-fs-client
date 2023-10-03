@@ -1,6 +1,11 @@
 <div class="visa-fs-file-manager-container">
     <tool-bar [linkedPath$]="linkedPath$"></tool-bar>
     <path-bar [path$]="path$"></path-bar>
-    <files-icon-view [path$]="path$" [directoryContent$]="directoryContent$" [directoryContentLoading$]="directoryContentLoading$"></files-icon-view>
+    <files-icon-view
+        [path$]="path$"
+        [directoryContent$]="directoryContent$"
+        [directoryContentLoading$]="directoryContentLoading$"
+        [downloadFile$]="downloadFile$"
+    ></files-icon-view>
 
 </div>
