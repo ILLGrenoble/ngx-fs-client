@@ -1,6 +1,6 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { FileStats } from '../../../../models';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
 import {VisaFileSystemService} from "../../../../services";
 
@@ -9,14 +9,10 @@ import {VisaFileSystemService} from "../../../../services";
     templateUrl: './file-icon-view.component.html',
     styleUrls: ['./file-icon-view.component.scss'],
 })
-export class FileIconViewComponent implements OnInit {
+export class FileIconViewComponent implements OnInit, OnDestroy {
 
     @ViewChild('fileNameInput')
     fileNameInput: ElementRef;
-
-    private _selected: boolean = false;
-    private _isFileNameEdit: boolean = false;
-    private _fileName: string;
 
     @Input()
     fileStats: FileStats;
@@ -34,8 +30,12 @@ export class FileIconViewComponent implements OnInit {
     selectedFile$: Subject<FileStats>;
 
     @Input()
-    renameInProgress$: BehaviorSubject<boolean>;
+    renameInProgress$: BehaviorSubject<FileStats>;
 
+    private _selected: boolean = false;
+    private _isFileNameEdit: boolean = false;
+    private _fileName: string;
+    private _destroy$: Subject<boolean> = new Subject<boolean>();
 
     get fileName(): string {
         return this._fileName;
@@ -57,11 +57,24 @@ export class FileIconViewComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.selectedFile$.subscribe(fileStats => {
+        this.selectedFile$.pipe(
+            takeUntil(this._destroy$)
+        ).subscribe(fileStats => {
             this._selected = (fileStats !== null && fileStats.path === this.fileStats.path);
         });
 
         this._fileName = this.fileStats.name;
+
+        this.renameInProgress$.pipe(
+            takeUntil(this._destroy$)
+        ).subscribe(fileStats => {
+            this.setFileNameEditActive(fileStats != null && fileStats.path === this.fileStats.path)
+        })
+    }
+
+    ngOnDestroy(): void {
+        this._destroy$.next(true);
+        this._destroy$.unsubscribe();
     }
 
     onDoubleClicked(): void {
@@ -77,12 +90,17 @@ export class FileIconViewComponent implements OnInit {
     }
 
     openMenu(event: Event, viewChild: MatMenuTrigger): void {
+        this.onSelect();
         event.preventDefault();
+        event.stopPropagation();
         viewChild.openMenu();
     }
 
-    editFileName(active: boolean): void {
-        this.renameInProgress$.next(active);
+    editFileName(): void {
+        this.renameInProgress$.next(this.fileStats);
+    }
+
+    setFileNameEditActive(active: boolean) {
         this._isFileNameEdit = active;
 
         if (active) {
@@ -99,23 +117,25 @@ export class FileIconViewComponent implements OnInit {
             const newPath = `${oldPath.substring(0, oldPath.lastIndexOf('/'))}/${this.fileName}`;
             this._fileSystemService.moveFile(this.fileStats, newPath).subscribe({
                 next: (newFileStats) => {
-                    this.fileStats = newFileStats;
+                    this.fileStats.name = newFileStats.name;
+                    this.fileStats.path = newFileStats.path;
+                    this.fileStats.last_modified = newFileStats.last_modified;
                     this._fileName = newFileStats.name;
-                    this.editFileName(false);
+                    this.renameInProgress$.next(null);
                 },
                 error: (error) => {
                     console.log(`Cannot update filename: ${error.error}`);
-                    this.editFileName(false);
+                    this.renameInProgress$.next(null);
                 }
             })
         } else {
-            this.editFileName(false);
+            this.renameInProgress$.next(null);
         }
     }
 
     cancelFileNameChange(): void {
         this._fileName = this.fileStats.name;
-        this.editFileName(false);
+        this.renameInProgress$.next(null);
     }
 
     downloadFile(): void {

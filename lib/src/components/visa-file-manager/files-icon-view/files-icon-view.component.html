@@ -1,4 +1,5 @@
-<div class="visa-fs-files-icon-view-container">
+<div class="visa-fs-files-icon-view-container"
+     (contextmenu)="openMenu($event, menuTrigger)">
     <div *ngIf="directoryContentLoading$ | async" class="visa-fs-files-icon-view-loading">
         <mat-spinner></mat-spinner>
     </div>
@@ -14,4 +15,24 @@
             ></file-icon-view>
         </div>
     </div>
+    <div style="visibility: hidden; position: fixed"
+         #menuTrigger="matMenuTrigger"
+         [style.left]="contextMenuPosition.x"
+         [style.top]="contextMenuPosition.y"
+         [matMenuTriggerFor]="folderActionMenu">
+    </div>
 </div>
+
+
+<mat-menu #folderActionMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button mat-menu-item (click)="onNewFile()">
+            <mat-icon>insert_drive_file</mat-icon>
+            <span>New File</span>
+        </button>
+        <button mat-menu-item (click)="onNewFolder()">
+            <mat-icon>create_new_folder</mat-icon>
+            <span>New Folder</span>
+        </button>
+    </ng-template>
+</mat-menu>

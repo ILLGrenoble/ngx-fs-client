@@ -93,4 +93,27 @@ export class VisaFileSystemService {
             })
         );
     }
+
+    public newFile(path: string): Observable<FileStats> {
+        const uriEncodedPath = encodeURI(path);
+        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+
+        const data = {
+            action: 'NEW_FILE'
+        }
+
+        return this._http.put<FileStats>(apiPath, data);
+    }
+
+    public newFolder(path: string): Observable<FileStats> {
+        const uriEncodedPath = encodeURI(path);
+        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+
+        const data = {
+            action: 'NEW_FOLDER'
+        }
+
+        return this._http.put<FileStats>(apiPath, data);
+    }
+
 }
