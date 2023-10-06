@@ -19,9 +19,13 @@
     justify-content: flex-start;
     align-items: center;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 8px;
 
     &:hover {
+        background-color: #dadada;
+    }
+
+    &__selected {
         background-color: #f4f4f4;
     }
 }

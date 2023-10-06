@@ -1,5 +1,5 @@
 <div class="visa-fs-file-icon-view-container">
-    <div class="visa-fs-file-icon-view-inner" (dblclick)="onDoubleClicked()">
+    <div class="visa-fs-file-icon-view-inner" [ngClass]="{'visa-fs-file-icon-view-inner__selected': selected}" (dblclick)="onDoubleClicked()" (click)="onSelect()">
 
         <div class="visa-fs-file-icon-view-icon">
             <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>

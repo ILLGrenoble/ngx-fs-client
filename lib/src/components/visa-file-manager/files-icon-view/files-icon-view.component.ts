@@ -1,6 +1,8 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import {Component, Input, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import { BehaviorSubject, filter } from 'rxjs';
 import { DirectoryContent, FileStats } from '../../../models';
+import {MatDialog} from "@angular/material/dialog";
+import {DownloadFileDialogComponent} from "./dialogs";
 
 @Component({
     selector: 'files-icon-view',
@@ -22,9 +24,13 @@ export class FilesIconViewComponent implements OnInit {
     directoryContentLoading$: BehaviorSubject<boolean>;
 
     @Input()
-    downloadFile$: BehaviorSubject<string>;
+    downloadFile$: BehaviorSubject<FileStats>;
 
-    fileDoubleClickedListener$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+    @Output()
+    selectedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+
+    @Output()
+    doubleClickedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
     private _items: FileStats[] = [];
 
@@ -32,7 +38,7 @@ export class FilesIconViewComponent implements OnInit {
         return this._items;
     }
 
-    constructor() {
+    constructor(private _dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -48,16 +54,25 @@ export class FilesIconViewComponent implements OnInit {
                 })
         });
 
-        this.fileDoubleClickedListener$.pipe(
+        this.doubleClickedFile$.pipe(
             filter(fileStats => fileStats != null)
         ).subscribe(fileStats => {
             if (fileStats.type === 'directory') {
                 this.path$.next(fileStats.path);
 
             } else {
-                this.downloadFile$.next(fileStats.path)
+                this.openDownloadFileDialog(fileStats)
             }
-        })
+        });
+    }
+
+    openDownloadFileDialog(fileStats: FileStats) {
+        const dialogRef = this._dialog.open(DownloadFileDialogComponent, {data: {fileStats}});
+        dialogRef.afterClosed().subscribe(res => {
+            if (res) {
+                this.downloadFile$.next(fileStats)
+            }
+        });
     }
 
 }

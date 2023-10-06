@@ -4,7 +4,11 @@
     </div>
     <div *ngIf="!(directoryContentLoading$ | async)" class="visa-fs-files-icon-view-contents">
         <div *ngFor="let item of items; ">
-            <file-icon-view [fileStats]="item" [fileDoubleClickedListener$]="fileDoubleClickedListener$"></file-icon-view>
+            <file-icon-view
+                [fileStats]="item"
+                [doubleClickedFile$]="doubleClickedFile$"
+                [selectedFile$]="selectedFile$"
+            ></file-icon-view>
         </div>
     </div>
 </div>
