@@ -10,7 +10,9 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatMenuModule} from '@angular/material/menu';
 import {FileDownloadingDialogComponent} from "./dialogs";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
     declarations: [
@@ -33,6 +35,8 @@ import {FileDownloadingDialogComponent} from "./dialogs";
         MatDialogModule,
         MatInputModule,
         MatProgressBarModule,
+        MatMenuModule,
+        FormsModule,
     ],
     providers: [],
     exports: [

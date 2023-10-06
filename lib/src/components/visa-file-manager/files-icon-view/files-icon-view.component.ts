@@ -32,6 +32,9 @@ export class FilesIconViewComponent implements OnInit {
     @Output()
     doubleClickedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
+    @Output()
+    renameInProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(null);
+
     private _items: FileStats[] = [];
 
     get items(): FileStats[] {

@@ -1,7 +1,7 @@
 import {HttpClient, HttpEvent, HttpEventType, HttpRequest} from '@angular/common/http';
 import {Inject, Injectable} from '@angular/core';
-import {concatMap, EMPTY, filter, Observable, of, throwError} from 'rxjs';
-import {DirectoryContent, FileContent, VisaFileSysConfiguration} from '../models';
+import {concatMap, EMPTY, filter, map, Observable, of, throwError} from 'rxjs';
+import {DirectoryContent, FileContent, FileStats, VisaFileSysConfiguration} from '../models';
 
 @Injectable({
     providedIn: 'root'
@@ -68,5 +68,16 @@ export class VisaFileSystemService {
                 }
             })
         );
+    }
+
+    public moveFile(fileStats: FileStats, newPath: string): Observable<FileStats> {
+        const uriEncodedPath = encodeURI(fileStats.path);
+        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+
+        const data = {
+            path: newPath
+        }
+
+        return this._http.patch<FileStats>(apiPath, data);
     }
 }

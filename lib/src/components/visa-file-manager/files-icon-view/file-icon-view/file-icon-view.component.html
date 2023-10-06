@@ -1,13 +1,39 @@
 <div class="visa-fs-file-icon-view-container">
-    <div class="visa-fs-file-icon-view-inner" [ngClass]="{'visa-fs-file-icon-view-inner__selected': selected}" (dblclick)="onDoubleClicked()" (click)="onSelect()">
+    <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{fileStats: fileStats}" #menuTrigger="matMenuTrigger"></span>
+
+    <div class="visa-fs-file-icon-view-inner"
+         [ngClass]="{'visa-fs-file-icon-view-inner__selected': selected}"
+         (dblclick)="onDoubleClicked()"
+         (click)="onSelect()"
+         (contextmenu)="openMenu($event, menuTrigger)">
 
         <div class="visa-fs-file-icon-view-icon">
             <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
             <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
         </div>
 
-        <div class="visa-fs-file-icon-view-name">
+        <input type="text" #fileNameInput class="visa-fs-file-icon-view-name-edit" [ngClass]="{'visa-fs-hidden': !isFileNameEdit}"
+               [(ngModel)]="fileName"
+               (keydown.enter)="updateFileName()"
+               (keydown.escape)="cancelFileNameChange()"
+               (blur)="cancelFileNameChange()">
+
+        <div class="visa-fs-file-icon-view-name" [ngClass]="{'visa-fs-hidden': isFileNameEdit}">
             {{ fileStats.name }}
         </div>
     </div>
 </div>
+
+
+<mat-menu #rootMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button mat-menu-item (click)="editFileName(true)">
+            <mat-icon>edit</mat-icon>
+            <span>Rename</span>
+        </button>
+        <button mat-menu-item >
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+        </button>
+    </ng-template>
+</mat-menu>
