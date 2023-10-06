@@ -27,11 +27,15 @@
 
 <mat-menu #rootMenu="matMenu" [overlapTrigger]="false">
     <ng-template matMenuContent>
+        <button *ngIf="fileStats.type === 'file'" mat-menu-item (click)="downloadFile()">
+            <mat-icon>cloud_download</mat-icon>
+            <span>Download</span>
+        </button>
         <button mat-menu-item (click)="editFileName(true)">
             <mat-icon>edit</mat-icon>
             <span>Rename</span>
         </button>
-        <button mat-menu-item >
+        <button mat-menu-item (click)="deleteFile()">
             <mat-icon>delete</mat-icon>
             <span>Delete</span>
         </button>

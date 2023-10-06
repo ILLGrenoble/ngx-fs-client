@@ -22,6 +22,12 @@ export class FileIconViewComponent implements OnInit {
     fileStats: FileStats;
 
     @Input()
+    downloadFile$: Subject<FileStats>;
+
+    @Input()
+    deleteFile$: Subject<FileStats>;
+
+    @Input()
     doubleClickedFile$: Subject<FileStats>;
 
     @Input()
@@ -110,6 +116,14 @@ export class FileIconViewComponent implements OnInit {
     cancelFileNameChange(): void {
         this._fileName = this.fileStats.name;
         this.editFileName(false);
+    }
+
+    downloadFile(): void {
+        this.downloadFile$.next(this.fileStats);
+    }
+
+    deleteFile(): void {
+        this.deleteFile$.next(this.fileStats);
     }
 
 }

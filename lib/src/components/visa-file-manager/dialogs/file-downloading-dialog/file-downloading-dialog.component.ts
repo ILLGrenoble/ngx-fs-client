@@ -24,7 +24,6 @@ export class FileDownloadingDialogComponent {
                 @Inject(MAT_DIALOG_DATA) data: { fileStats: FileStats, downloadProgress$: BehaviorSubject<{progress: number, error?: string}>  }) {
         this._fileStats = data.fileStats;
         data.downloadProgress$.subscribe(({progress, error}) => {
-            console.log(`got progress of ${progress}`);
             this.progress = progress;
             this.error = error;
         })

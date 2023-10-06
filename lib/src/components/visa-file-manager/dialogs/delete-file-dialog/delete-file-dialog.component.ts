@@ -1,13 +1,13 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {FileStats} from "../../../../../models";
+import {FileStats} from "../../../../models";
 
 @Component({
-    selector: 'download-file-dialog',
-    templateUrl: './download-file-dialog.component.html',
-    styleUrls: ['./download-file-dialog.component.scss'],
+    selector: 'delete-file-dialog',
+    templateUrl: './delete-file-dialog.component.html',
+    styleUrls: ['./delete-file-dialog.component.scss'],
 })
-export class DownloadFileDialogComponent {
+export class DeleteFileDialogComponent {
 
     private readonly _fileStats: FileStats;
 
@@ -15,7 +15,7 @@ export class DownloadFileDialogComponent {
         return this._fileStats;
     }
 
-    constructor(public dialogRef: MatDialogRef<DownloadFileDialogComponent>,
+    constructor(public dialogRef: MatDialogRef<DeleteFileDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) data: { fileStats: FileStats }) {
         this._fileStats = data.fileStats;
     }

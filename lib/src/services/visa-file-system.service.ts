@@ -1,6 +1,6 @@
 import {HttpClient, HttpEvent, HttpEventType, HttpRequest} from '@angular/common/http';
 import {Inject, Injectable} from '@angular/core';
-import {concatMap, EMPTY, filter, map, Observable, of, throwError} from 'rxjs';
+import {catchError, concatMap, EMPTY, filter, map, Observable, of, throwError} from 'rxjs';
 import {DirectoryContent, FileContent, FileStats, VisaFileSysConfiguration} from '../models';
 
 @Injectable({
@@ -79,5 +79,18 @@ export class VisaFileSystemService {
         }
 
         return this._http.patch<FileStats>(apiPath, data);
+    }
+
+    public deleteFileOrFolder(fileStats: FileStats): Observable<boolean> {
+        const uriEncodedPath = encodeURI(fileStats.path);
+        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+
+        return this._http.delete(apiPath).pipe(
+            map(() => true),
+            catchError((error) => {
+                console.log(error.error);
+                return of(false);
+            })
+        );
     }
 }

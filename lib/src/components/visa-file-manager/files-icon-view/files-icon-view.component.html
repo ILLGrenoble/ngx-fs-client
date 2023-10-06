@@ -6,6 +6,8 @@
         <div *ngFor="let item of items; ">
             <file-icon-view
                 [fileStats]="item"
+                [downloadFile$]="downloadFile$"
+                [deleteFile$]="deleteFile$"
                 [doubleClickedFile$]="doubleClickedFile$"
                 [selectedFile$]="selectedFile$"
                 [renameInProgress$]="renameInProgress$"

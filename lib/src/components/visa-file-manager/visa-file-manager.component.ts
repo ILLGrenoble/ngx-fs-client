@@ -1,10 +1,9 @@
-import { Component, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { VisaFileSystemService } from '../../services';
 import {DirectoryContent, FileContent, FileStats, LinkedPath} from '../../models';
-import {DownloadFileDialogComponent} from "./files-icon-view";
 import {MatDialog} from "@angular/material/dialog";
-import {FileDownloadingDialogComponent} from "./dialogs";
+import {DeleteFileDialogComponent, FileDownloadingDialogComponent} from "./dialogs";
 
 @Component({
     selector: 'visa-file-manager',
@@ -25,6 +24,9 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     @Output()
     downloadFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+
+    @Output()
+    deleteFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
     @Output()
     directoryContentLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -75,6 +77,12 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             this.downloadFile(fileStats);
         })
 
+        this.deleteFile$.pipe(
+            filter(fileStats => fileStats != null)
+        ).subscribe(fileStats => {
+            this.openDeleteFileDialog(fileStats)
+        });
+
     }
 
     ngOnDestroy(): void {
@@ -119,6 +127,19 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
                 }
             });
 
+    }
+
+    openDeleteFileDialog(fileStats: FileStats) {
+        const dialogRef = this._dialog.open(DeleteFileDialogComponent, {data: {fileStats}});
+        dialogRef.afterClosed().subscribe(res => {
+            if (res) {
+                this._fileSystemService.deleteFileOrFolder(fileStats).subscribe(success => {
+                    if (success) {
+                        this.linkedPath$.next(this.linkedPath$.getValue());
+                    }
+                })
+            }
+        });
     }
 
     private async _blobFromBase64(fileContent: FileContent): Promise<Blob> {

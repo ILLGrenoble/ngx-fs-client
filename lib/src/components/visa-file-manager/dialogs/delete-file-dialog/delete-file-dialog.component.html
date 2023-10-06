@@ -1,0 +1,15 @@
+<h1 mat-dialog-title>Delete {{fileStats.type === 'directory' ? "folder" : "file"}}</h1>
+
+<mat-dialog-content>
+    <div>
+        Delete {{fileStats.type === 'directory' ? "folder" : "file"}} <b>{{fileStats.name}}</b>?
+    </div>
+    <div class="visa-fs-delete-file-dialog-warning">
+        Warning: this action cannot be undone!
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+    <button mat-raised-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button [mat-dialog-close]="true" color="primary">OK</button>
+</mat-dialog-actions>

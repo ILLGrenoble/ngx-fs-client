@@ -3,6 +3,7 @@ import { BehaviorSubject, filter } from 'rxjs';
 import { DirectoryContent, FileStats } from '../../../models';
 import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
+import {VisaFileSystemService} from "../../../services";
 
 @Component({
     selector: 'files-icon-view',
@@ -26,6 +27,9 @@ export class FilesIconViewComponent implements OnInit {
     @Input()
     downloadFile$: BehaviorSubject<FileStats>;
 
+    @Input()
+    deleteFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+
     @Output()
     selectedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
@@ -41,7 +45,8 @@ export class FilesIconViewComponent implements OnInit {
         return this._items;
     }
 
-    constructor(private _dialog: MatDialog) {
+    constructor(private _dialog: MatDialog,
+                private _fileSystemService: VisaFileSystemService) {
     }
 
     ngOnInit() {
