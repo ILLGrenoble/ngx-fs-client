@@ -34,8 +34,13 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     private _selected: boolean = false;
     private _isFileNameEdit: boolean = false;
+    private _displayFileName: string;
     private _fileName: string;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
+
+    get displayFileName(): string {
+        return this._displayFileName;
+    }
 
     get fileName(): string {
         return this._fileName;
@@ -64,6 +69,16 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         });
 
         this._fileName = this.fileStats.name;
+        const maxLength = 32;
+        if (this.fileStats.name.length > maxLength) {
+            const len = this.fileStats.name.length;
+            const end = this.fileStats.name.substring(len - 8);
+            const start = this.fileStats.name.substring(0, maxLength - 11);
+            this._displayFileName = `${start}...${end}`;
+
+        } else {
+            this._displayFileName = this.fileStats.name;
+        }
 
         this.renameInProgress$.pipe(
             takeUntil(this._destroy$)
