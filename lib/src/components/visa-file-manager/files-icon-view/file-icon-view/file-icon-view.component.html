@@ -18,7 +18,8 @@
                (keydown.escape)="cancelFileNameChange()"
                (blur)="cancelFileNameChange()">
 
-        <div class="visa-fs-file-icon-view-name" [ngClass]="{'visa-fs-hidden': isFileNameEdit}">
+        <div class="visa-fs-file-icon-view-name" [ngClass]="{'visa-fs-hidden': isFileNameEdit, 'visa-fs-file-icon-view-name__selected': selected}">
+
             {{ displayFileName }}
         </div>
     </div>

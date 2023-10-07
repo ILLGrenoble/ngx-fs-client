@@ -22,11 +22,11 @@
     border-radius: 8px;
 
     &:hover {
-        background-color: #dadada;
+        background-color: #cccccc;
     }
 
     &__selected {
-        background-color: #f4f4f4;
+        background-color: #e5e5e5;
     }
 }
 
@@ -49,25 +49,35 @@
     line-height: 14px;
     font-size: 12px;
     font-weight: 500;
-    width: 100%;
     max-width: 100%;
     text-align: center;
     word-wrap: break-word;
+    padding: 1px 2px 1px 2px;
+    border: 2px solid transparent;
+
+    &__selected {
+        background-color: #6596fc;
+        color: white;
+        border-radius: 4px;
+    }
 }
 
 .visa-fs-file-icon-view-name-edit {
-    height: 28px;
     line-height: 14px;
     font-size: 12px;
     font-weight: 500;
-    width: 100%;
     max-width: 100%;
     text-align: center;
     word-wrap: break-word;
+    border-radius: 4px;
 
     color: #5e5e5e;
     border: 2px solid #4ca4dd;
     background-color: #edebeb;
+
+    &::selection {
+        background-color: #a0bbff;
+    }
 }
 
 

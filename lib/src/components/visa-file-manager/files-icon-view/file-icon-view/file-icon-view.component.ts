@@ -48,6 +48,17 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     set fileName(value: string) {
         this._fileName = value;
+        const maxLength = 32;
+        if (this.fileStats.name.length > maxLength) {
+            const len = this.fileStats.name.length;
+            const end = this.fileStats.name.substring(len - 8);
+            const start = this.fileStats.name.substring(0, maxLength - 11);
+            this._displayFileName = `${start}...${end}`;
+
+        } else {
+            this._displayFileName = this.fileStats.name;
+        }
+
     }
 
     get selected(): boolean {
@@ -68,17 +79,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
             this._selected = (fileStats !== null && fileStats.path === this.fileStats.path);
         });
 
-        this._fileName = this.fileStats.name;
-        const maxLength = 32;
-        if (this.fileStats.name.length > maxLength) {
-            const len = this.fileStats.name.length;
-            const end = this.fileStats.name.substring(len - 8);
-            const start = this.fileStats.name.substring(0, maxLength - 11);
-            this._displayFileName = `${start}...${end}`;
-
-        } else {
-            this._displayFileName = this.fileStats.name;
-        }
+        this.fileName = this.fileStats.name;
 
         this.renameInProgress$.pipe(
             takeUntil(this._destroy$)
@@ -135,7 +136,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
                     this.fileStats.name = newFileStats.name;
                     this.fileStats.path = newFileStats.path;
                     this.fileStats.last_modified = newFileStats.last_modified;
-                    this._fileName = newFileStats.name;
+                    this.fileName = newFileStats.name;
                     this.renameInProgress$.next(null);
                 },
                 error: (error) => {
@@ -149,7 +150,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     cancelFileNameChange(): void {
-        this._fileName = this.fileStats.name;
+        this.fileName = this.fileStats.name;
         this.renameInProgress$.next(null);
     }
 
