@@ -33,6 +33,8 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     renameInProgress$: BehaviorSubject<FileStats>;
 
     private _selected: boolean = false;
+    private _isSingleClick: Boolean = true;
+
     private _isFileNameEdit: boolean = false;
     private _displayFileName: string;
     private _fileName: string;
@@ -94,20 +96,28 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     onDoubleClicked(): void {
+        this._isSingleClick = false;
+
         if (!this.renameInProgress$.getValue()) {
+            this.selectedFile$.next(this.fileStats);
             this.doubleClickedFile$.next(this.fileStats);
         }
     }
 
     onSelect(): void {
-        if (!this.renameInProgress$.getValue()) {
-            if (this.selectedFile$.getValue() != null && this.selectedFile$.getValue() === this.fileStats) {
-                this.editFileName();
+        this._isSingleClick = true;
+        setTimeout(() => {
+            if(this._isSingleClick){
+                if (!this.renameInProgress$.getValue()) {
+                    if (this.selectedFile$.getValue() != null && this.selectedFile$.getValue() === this.fileStats) {
+                        this.editFileName();
 
-            } else {
-                this.selectedFile$.next(this.fileStats);
+                    } else {
+                        this.selectedFile$.next(this.fileStats);
+                    }
+                }
             }
-        }
+        }, 250)
     }
 
     openMenu(event: Event, viewChild: MatMenuTrigger): void {
