@@ -27,7 +27,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     doubleClickedFile$: Subject<FileStats>;
 
     @Input()
-    selectedFile$: Subject<FileStats>;
+    selectedFile$: BehaviorSubject<FileStats>;
 
     @Input()
     renameInProgress$: BehaviorSubject<FileStats>;
@@ -101,7 +101,12 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     onSelect(): void {
         if (!this.renameInProgress$.getValue()) {
-            this.selectedFile$.next(this.fileStats);
+            if (this.selectedFile$.getValue() != null && this.selectedFile$.getValue() === this.fileStats) {
+                this.editFileName();
+
+            } else {
+                this.selectedFile$.next(this.fileStats);
+            }
         }
     }
 
@@ -113,7 +118,9 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     editFileName(): void {
-        this.renameInProgress$.next(this.fileStats);
+        if (this.renameInProgress$.getValue() !== this.fileStats) {
+            this.renameInProgress$.next(this.fileStats);
+        }
     }
 
     setFileNameEditActive(active: boolean) {
