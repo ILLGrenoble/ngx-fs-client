@@ -5,8 +5,16 @@
          [ngClass]="{'visa-fs-file-icon-view-inner__selected': selected}"
          (dblclick)="onDoubleClicked()"
          (click)="onSelect()"
-         (contextmenu)="openMenu($event, menuTrigger)">
+         (contextmenu)="openMenu($event, menuTrigger)"
+         [dndDraggable]="fileStats"
+         [dndEffectAllowed]="'all'"
+         (dndDrop)="onDrop($event)"
+         (dndStart)="onDragStart()"
+         [dndDisableDropIf]="fileStats.type === 'file'"
+         dndDropzone
+         dndDragoverClass="visa-fs-file-icon-view-inner__drag-over"
 
+    >
         <div class="visa-fs-file-icon-view-icon">
             <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
             <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>

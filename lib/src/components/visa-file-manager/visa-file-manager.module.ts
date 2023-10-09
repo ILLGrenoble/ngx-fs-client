@@ -17,6 +17,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatMenuModule} from '@angular/material/menu';
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent} from "./dialogs";
 import {FormsModule} from "@angular/forms";
+import {DndModule} from 'ngx-drag-drop';
 
 @NgModule({
     declarations: [
@@ -42,6 +43,7 @@ import {FormsModule} from "@angular/forms";
         MatProgressBarModule,
         MatMenuModule,
         FormsModule,
+        DndModule,
     ],
     providers: [],
     exports: [

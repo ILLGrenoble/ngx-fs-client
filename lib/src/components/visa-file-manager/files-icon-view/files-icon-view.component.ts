@@ -1,6 +1,6 @@
 import {Component, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation} from '@angular/core';
 import {BehaviorSubject, filter, Subject, takeLast, takeUntil} from 'rxjs';
-import { DirectoryContent, FileStats } from '../../../models';
+import { DirectoryContent, FileStats, MovedFile } from '../../../models';
 import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
 import {VisaFileSystemService} from "../../../services";
@@ -45,6 +45,9 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     @Output()
     renameInProgress$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
+    @Output()
+    movedFile$: BehaviorSubject<MovedFile> = new BehaviorSubject<MovedFile>(null);
+
     private _items: FileStats[] = [];
     private _destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -78,11 +81,17 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
 
         this.renameInProgress$.pipe(
             takeUntil(this._destroy$),
-        ).subscribe(fileStats => {
-            if (fileStats == null) {
-                this._items = this._sortDirectoryContent(this._items);
-            }
+            filter(fileStats => fileStats != null)
+        ).subscribe(() => {
+            this._items = this._sortDirectoryContent(this._items);
         });
+
+        this.movedFile$.pipe(
+            takeUntil(this._destroy$),
+            filter(data => data != null)
+        ).subscribe(movedFile => {
+            this._moveFile(movedFile.file, movedFile.newPath);
+        })
     }
 
     ngOnDestroy(): void {
@@ -121,6 +130,17 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         this._fileSystemService.newFolder(this.path$.getValue()).subscribe(fileStats => {
             this._items = this._sortDirectoryContent([...this._items, fileStats]);
             this.renameInProgress$.next(fileStats);
+        })
+    }
+
+    private _moveFile(fileStats: FileStats, newPath: string): void {
+        this._fileSystemService.moveFile(fileStats, newPath).subscribe({
+            next: () => {
+                this._items = this._items.filter(item => item.path != fileStats.path);
+            },
+            error: (error) => {
+                console.log(`Cannot move file: ${error.error}`);
+            }
         })
     }
 

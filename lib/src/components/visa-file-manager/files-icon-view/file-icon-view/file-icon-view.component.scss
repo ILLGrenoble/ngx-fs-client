@@ -21,13 +21,20 @@
     cursor: pointer;
     border-radius: 8px;
 
-    &:hover {
-        background-color: #cccccc;
-    }
+    //&:hover {
+    //    background-color: #cccccc;
+    //}
 
     &__selected {
         background-color: #e5e5e5;
     }
+
+    &__drag-over {
+        background-color: #cccccc;
+    }
+}
+
+.visa-fs-file-icon-view-draggable {
 }
 
 .visa-fs-file-icon-view-icon {

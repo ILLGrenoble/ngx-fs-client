@@ -1,8 +1,9 @@
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { FileStats } from '../../../../models';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { FileStats, MovedFile } from '../../../../models';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
 import {VisaFileSystemService} from "../../../../services";
+import { DndDropEvent, DndDropzoneDirective } from 'ngx-drag-drop';
 
 @Component({
     selector: 'file-icon-view',
@@ -31,6 +32,9 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     @Input()
     renameInProgress$: BehaviorSubject<FileStats>;
+
+    @Input()
+    movedFile$: BehaviorSubject<MovedFile>;
 
     private _selected: boolean = false;
     private _isSingleClick: Boolean = true;
@@ -121,7 +125,9 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     openMenu(event: Event, viewChild: MatMenuTrigger): void {
-        this.onSelect();
+        if (this.selectedFile$.getValue() == null || this.selectedFile$.getValue() !== this.fileStats) {
+            this.selectedFile$.next(this.fileStats);
+        }
         event.preventDefault();
         event.stopPropagation();
         viewChild.openMenu();
@@ -179,4 +185,15 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         this.deleteFile$.next(this.fileStats);
     }
 
+    onDragStart(): void {
+        if (this.selectedFile$.getValue() == null || this.selectedFile$.getValue() !== this.fileStats) {
+            this.selectedFile$.next(this.fileStats);
+        }
+    }
+
+    onDrop(event: DndDropEvent): void {
+        const fileStats = event.data;
+
+        this.movedFile$.next({file: fileStats, newPath: `${this.fileStats.path}/${fileStats.name}`});
+    }
 }
