@@ -25,16 +25,22 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
 
     private readonly _uploadEvent$: BehaviorSubject<UploadEvent>;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
-    private _progress: number = 0;
+    private _completed: boolean = false;
+    private _cancelled: boolean = false;
     private _fileSystemService: VisaFileSystemService;
 
     private _fileUploads: FileUpload[] = [];
-    private _currentUploadIndex = 0;
-
-    private _fileUpload$: BehaviorSubject<FileUpload> = new BehaviorSubject<FileUpload>(null);
 
     get fileUploads(): FileUpload[] {
         return this._fileUploads;
+    }
+
+    get completed(): boolean {
+        return this._completed;
+    }
+
+    get cancelled(): boolean {
+        return this._cancelled;
     }
 
     constructor(public dialogRef: MatDialogRef<FileUploadDialogComponent>,
@@ -100,11 +106,14 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
                                 return EMPTY;
                             })
                         );
-                    })
+                    }),
+                    takeUntil(this._destroy$),
                 );
-            })
+            }),
+            takeUntil(this._destroy$),
         ).subscribe(({fileUpload, fileStats}) => {
             console.log(`FileUpload completed for ${fileStats.path}, size = ${fileStats.size}`);
+            this._completed = this._fileUploads.find(fileUpload => fileUpload.progress !== 100) == null;
         });
     }
 
@@ -127,5 +136,10 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
 
             fileReader.readAsDataURL(blob);
         })
+    }
+
+    public onCancel(): void {
+        this._destroy$.next(true);
+        this._cancelled = true;
     }
 }

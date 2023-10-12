@@ -1,22 +1,38 @@
-<h1 mat-dialog-title>File download</h1>
+<h1 mat-dialog-title>File upload</h1>
 
 <mat-dialog-content>
-    <div *ngFor="let fileUpload of fileUploads">
-        <div *ngIf="fileUpload.progress != 100">
-            Uploading <b>{{fileUpload.file.name}}</b>...
+    <div *ngFor="let fileUpload of fileUploads" class="visa-fs-file-upload-dialog-item">
+        <div *ngIf="cancelled">
+            <div *ngIf="fileUpload.progress !== 100">
+                Cancelled upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
+            </div>
+            <div *ngIf="fileUpload.progress === 100 && fileUpload.error == null">
+                Uploaded <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
+            </div>
+            <div class="visa-fs-file-manager-error" *ngIf="fileUpload.progress === 100 && fileUpload.error != null">
+                Failed to upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>: {{fileUpload.error}}
+            </div>
         </div>
-        <div *ngIf="fileUpload.progress == 100 && fileUpload.error == null">
-            Uploading <b>{{fileUpload.file.name}}</b>
-        </div>
-        <div class="visa-fs-file-manager-error" *ngIf="fileUpload.progress == 100 && fileUpload.error != null">
-            Failed to download <b>{{fileUpload.file.name}}</b>: {{fileUpload.error}}
+        <div *ngIf="!cancelled">
+            <div *ngIf="fileUpload.progress === 0">
+                Waiting to upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
+            </div>
+            <div *ngIf="fileUpload.progress > 0 && fileUpload.progress < 100">
+                Uploading <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
+            </div>
+            <div *ngIf="fileUpload.progress === 100 && fileUpload.error == null">
+                Uploaded <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
+            </div>
+            <div class="visa-fs-file-manager-error" *ngIf="fileUpload.progress === 100 && fileUpload.error != null">
+                Failed to upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>: {{fileUpload.error}}
+            </div>
         </div>
         <mat-progress-bar mode="determinate" [value]="fileUpload.progress"></mat-progress-bar>
     </div>
 </mat-dialog-content>
 
 <mat-dialog-actions>
-    <button mat-raised-button mat-dialog-close>Cancel</button>
-<!--    <button mat-raised-button mat-dialog-close *ngIf="progress != 100">Cancel</button>-->
-<!--    <button mat-raised-button [mat-dialog-close]="true" color="primary" *ngIf="progress == 100">OK</button>-->
+    <button mat-raised-button (click)="onCancel()" *ngIf="!completed && !cancelled">Cancel</button>
+    <button mat-raised-button mat-dialog-close *ngIf="!completed && cancelled">Close</button>
+    <button mat-raised-button [mat-dialog-close]="true" color="primary" *ngIf="completed">OK</button>
 </mat-dialog-actions>

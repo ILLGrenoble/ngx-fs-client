@@ -18,6 +18,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
 import {FormsModule} from "@angular/forms";
 import {DndModule} from 'ngx-drag-drop';
+import { FileNameReducerPipe } from '../../pipes';
 
 @NgModule({
     declarations: [
@@ -30,6 +31,7 @@ import {DndModule} from 'ngx-drag-drop';
         DeleteFileDialogComponent,
         FileDownloadingDialogComponent,
         FileUploadDialogComponent,
+        FileNameReducerPipe,
     ],
     imports: [
         AsyncPipe,
