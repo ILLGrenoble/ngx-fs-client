@@ -1,6 +1,6 @@
 import {Component, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation} from '@angular/core';
 import {BehaviorSubject, filter, Subject, takeLast, takeUntil} from 'rxjs';
-import { DirectoryContent, FileStats, MovedFile } from '../../../models';
+import {DirectoryContent, FileStats, MovedFile, UploadEvent} from '../../../models';
 import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
 import {VisaFileSystemService} from "../../../services";
@@ -34,7 +34,10 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     downloadFile$: BehaviorSubject<FileStats>;
 
     @Input()
-    deleteFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+    deleteFile$: BehaviorSubject<FileStats>;
+
+    @Input()
+    uploadEvent$: BehaviorSubject<UploadEvent>;
 
     @Output()
     selectedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);

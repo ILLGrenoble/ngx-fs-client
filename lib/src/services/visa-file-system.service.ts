@@ -1,7 +1,14 @@
 import {HttpClient, HttpEvent, HttpEventType, HttpRequest} from '@angular/common/http';
 import {Inject, Injectable} from '@angular/core';
-import {catchError, concatMap, EMPTY, filter, map, Observable, of, throwError} from 'rxjs';
-import {DirectoryContent, FileContent, FileStats, VisaFileSysConfiguration} from '../models';
+import {catchError, concatMap, delay, EMPTY, filter, map, Observable, of, throwError} from 'rxjs';
+import {
+    DirectoryContent,
+    FileContent,
+    FileStats,
+    UploadData,
+    UploadProgress,
+    VisaFileSysConfiguration
+} from '../models';
 
 @Injectable({
     providedIn: 'root'
@@ -114,6 +121,39 @@ export class VisaFileSystemService {
         }
 
         return this._http.put<FileStats>(apiPath, data);
+    }
+
+    public uploadFile(path: string, data: UploadData): Observable<FileStats> {
+        const uriEncodedPath = encodeURI(path);
+        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+
+        return this._http.post<FileStats>(apiPath, data);
+    }
+
+    public uploadFileWithProgress(path: string, data: UploadData): Observable<UploadProgress> {
+        const uriEncodedPath = encodeURI(path);
+        const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
+
+        const req = new HttpRequest('POST', apiPath, data, {
+            reportProgress: true
+        });
+
+        let currentProgress = 0;
+        return this._http.request(req).pipe(
+            concatMap(event => {
+                if (event.type === HttpEventType.UploadProgress) {
+                    currentProgress = Math.round(100 * event.loaded / event.total);
+                    return of({progress: currentProgress})
+
+                } else if (event.type === HttpEventType.Response) {
+                    const data = event.body as FileStats;
+                    return of({progress: 100, fileStats: data});
+
+                } else {
+                    return EMPTY;
+                }
+            })
+        );
     }
 
 }

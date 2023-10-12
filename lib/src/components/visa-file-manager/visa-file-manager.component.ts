@@ -1,9 +1,9 @@
 import {Component, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { VisaFileSystemService } from '../../services';
-import {DirectoryContent, FileContent, FileStats, LinkedPath} from '../../models';
-import {MatDialog} from "@angular/material/dialog";
-import {DeleteFileDialogComponent, FileDownloadingDialogComponent} from "./dialogs";
+import {DirectoryContent, FileContent, FileStats, LinkedPath, UploadEvent} from '../../models';
+import {MatDialog, MatDialogRef} from "@angular/material/dialog";
+import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
 
 @Component({
     selector: 'visa-file-manager',
@@ -31,7 +31,11 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     @Output()
     directoryContentLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
+    @Output()
+    uploadEvent$: BehaviorSubject<UploadEvent> = new BehaviorSubject<UploadEvent>(null);
+
     private _destroy$: Subject<boolean> = new Subject<boolean>();
+    private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
 
     constructor(private _fileSystemService: VisaFileSystemService,
                 private _dialog: MatDialog) {
@@ -83,6 +87,12 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             this.openDeleteFileDialog(fileStats)
         });
 
+        this.uploadEvent$.pipe(
+            takeUntil(this._destroy$),
+            filter(uploadEvent => uploadEvent != null)
+        ).subscribe(uploadEvent => {
+            this._handleUpload(uploadEvent);
+        })
     }
 
     ngOnDestroy(): void {
@@ -140,6 +150,15 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
                 })
             }
         });
+    }
+
+    private _handleUpload(uploadEvent: UploadEvent): void {
+        if (this._uploadDialog == null) {
+            this._uploadDialog = this._dialog.open(FileUploadDialogComponent, {data: {uploadEvent$: this.uploadEvent$, fileSystemService: this._fileSystemService}});
+            this._uploadDialog.afterClosed().subscribe(() => {
+                this._uploadDialog = null;
+            });
+        }
     }
 
     private async _blobFromBase64(fileContent: FileContent): Promise<Blob> {

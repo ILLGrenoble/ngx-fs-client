@@ -15,7 +15,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatMenuModule} from '@angular/material/menu';
-import {DeleteFileDialogComponent, FileDownloadingDialogComponent} from "./dialogs";
+import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
 import {FormsModule} from "@angular/forms";
 import {DndModule} from 'ngx-drag-drop';
 
@@ -29,6 +29,7 @@ import {DndModule} from 'ngx-drag-drop';
         DownloadFileDialogComponent,
         DeleteFileDialogComponent,
         FileDownloadingDialogComponent,
+        FileUploadDialogComponent,
     ],
     imports: [
         AsyncPipe,

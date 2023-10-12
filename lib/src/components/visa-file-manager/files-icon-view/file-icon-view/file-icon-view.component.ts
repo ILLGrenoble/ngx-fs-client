@@ -1,9 +1,10 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { FileStats, MovedFile } from '../../../../models';
+import {FileStats, MovedFile, UploadEvent} from '../../../../models';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
 import {VisaFileSystemService} from "../../../../services";
-import { DndDropEvent, DndDropzoneDirective } from 'ngx-drag-drop';
+import { DndDropEvent } from 'ngx-drag-drop';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
     selector: 'file-icon-view',
@@ -35,6 +36,9 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     @Input()
     movedFile$: BehaviorSubject<MovedFile>;
+
+    @Input()
+    uploadEvent$: BehaviorSubject<UploadEvent>;
 
     private _selected: boolean = false;
     private _isSingleClick: Boolean = true;
@@ -75,7 +79,8 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         return this._isFileNameEdit;
     }
 
-    constructor(private _fileSystemService: VisaFileSystemService) {
+    constructor(private _fileSystemService: VisaFileSystemService,
+                private _sanitizer: DomSanitizer) {
     }
 
     ngOnInit() {
@@ -191,9 +196,14 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         }
     }
 
-    onDrop(event: DndDropEvent): void {
-        const fileStats = event.data;
+    async onDrop(event: DndDropEvent): Promise<void> {
+        if (event.isExternal) {
+            const uploadEvent = new UploadEvent({path: this.fileStats.path, files: event.event.dataTransfer.files});
+            this.uploadEvent$.next(uploadEvent);
 
-        this.movedFile$.next({file: fileStats, newPath: `${this.fileStats.path}/${fileStats.name}`});
+        } else {
+            const fileStats = event.data;
+            this.movedFile$.next({file: fileStats, newPath: `${this.fileStats.path}/${fileStats.name}`});
+        }
     }
 }

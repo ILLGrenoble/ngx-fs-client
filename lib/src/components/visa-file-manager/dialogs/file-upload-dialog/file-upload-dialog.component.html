@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>File download</h1>
+
+<mat-dialog-content>
+    <div *ngFor="let fileUpload of fileUploads">
+        <div *ngIf="fileUpload.progress != 100">
+            Uploading <b>{{fileUpload.file.name}}</b>...
+        </div>
+        <div *ngIf="fileUpload.progress == 100 && fileUpload.error == null">
+            Uploading <b>{{fileUpload.file.name}}</b>
+        </div>
+        <div class="visa-fs-file-manager-error" *ngIf="fileUpload.progress == 100 && fileUpload.error != null">
+            Failed to download <b>{{fileUpload.file.name}}</b>: {{fileUpload.error}}
+        </div>
+        <mat-progress-bar mode="determinate" [value]="fileUpload.progress"></mat-progress-bar>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+    <button mat-raised-button mat-dialog-close>Cancel</button>
+<!--    <button mat-raised-button mat-dialog-close *ngIf="progress != 100">Cancel</button>-->
+<!--    <button mat-raised-button [mat-dialog-close]="true" color="primary" *ngIf="progress == 100">OK</button>-->
+</mat-dialog-actions>

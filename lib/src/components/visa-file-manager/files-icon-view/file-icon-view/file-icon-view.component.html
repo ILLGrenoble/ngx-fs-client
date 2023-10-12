@@ -13,7 +13,7 @@
          [dndDisableDropIf]="fileStats.type === 'file'"
          dndDropzone
          dndDragoverClass="visa-fs-file-icon-view-inner__drag-over"
-
+         [dndAllowExternal]="true"
     >
         <div class="visa-fs-file-icon-view-icon">
             <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
