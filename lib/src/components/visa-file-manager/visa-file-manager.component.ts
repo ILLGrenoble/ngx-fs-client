@@ -154,7 +154,10 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     private _handleUpload(uploadEvent: UploadEvent): void {
         if (this._uploadDialog == null) {
-            this._uploadDialog = this._dialog.open(FileUploadDialogComponent, {data: {uploadEvent$: this.uploadEvent$, fileSystemService: this._fileSystemService}});
+            this._uploadDialog = this._dialog.open(FileUploadDialogComponent, {
+                width: '800px',
+                data: {uploadEvent$: this.uploadEvent$, fileSystemService: this._fileSystemService}
+            });
             this._uploadDialog.afterClosed().subscribe(() => {
                 this._uploadDialog = null;
             });

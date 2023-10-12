@@ -46,46 +46,6 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        // this._uploadEvent$.pipe(
-        //     takeUntil(this._destroy$),
-        //     filter(uploadEvent => uploadEvent != null)
-        // ).subscribe(uploadEvent => {
-        //     for (let i = 0; i < uploadEvent.files.length; i++) {
-        //         const file = uploadEvent.files[i];
-        //         this._fileUploads.push(new FileUpload({file: file, name: file.name, size: file.size, uploadPath: uploadEvent.path}))
-        //     }
-        //
-        //     // Start an upload if not one already in progress
-        //     if (this._fileUpload$.getValue() == null) {
-        //         this._fileUpload$.next(this._fileUploads[this._currentUploadIndex]);
-        //     }
-        // });
-        //
-        // this._fileUpload$.pipe(
-        //     takeUntil(this._destroy$),
-        //     filter(fileUpload => fileUpload != null)
-        // ).subscribe(async (fileUpload) => {
-        //     console.log(`uploading ${fileUpload.name}`);
-        //
-        //     if (fileUpload.chunks) {
-        //         for (const chunk of fileUpload.chunks) {
-        //             const chunkContents = await this._getFileContent(fileUpload.file.slice(chunk.start, chunk.end));
-        //
-        //         }
-        //
-        //     } else {
-        //         const contents = await this._getFileContent(fileUpload.file);
-        //
-        //     }
-        //
-        //
-        //     // Finished, do next
-        //     this._currentUploadIndex++;
-        //     if (this._fileUploads.length > this._currentUploadIndex) {
-        //         this._fileUpload$.next(this._fileUploads[this._currentUploadIndex]);
-        //     }
-        // })
-
         this._uploadEvent$.pipe(
             takeUntil(this._destroy$),
             filter(uploadEvent => uploadEvent != null),
@@ -93,51 +53,59 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
                 const fileUploads = [];
                 for (let i = 0; i < uploadEvent.files.length; i++) {
                     const file = uploadEvent.files[i];
-                    fileUploads.push(new FileUpload({
+                    const fileUpload = new FileUpload({
                         file: file,
                         uploadPath: uploadEvent.path
-                    }))
+                    });
+
+                    this._fileUploads.push(fileUpload);
+                    fileUploads.push(fileUpload)
                 }
                 return from(fileUploads);
             }),
             concatMap(fileUpload => {
-                console.log(`uploading ${fileUpload.file.name}`);
-                this._fileUploads.push(fileUpload);
+                console.log(`Uploading ${fileUpload.file.name}`);
                 const chunks = fileUpload.createChunks();
-                return from(chunks);
-            }),
-            concatMap(fileUploadChunk => {
-                return from(this._getFileContent(fileUploadChunk.blob)).pipe(
-                    map(content => ({content, chunk: fileUploadChunk.chunkIndex, name: fileUploadChunk.fileName, format: 'base64', type: 'file'} as UploadData)),
-                    map(uploadData => ({fileUploadChunk: fileUploadChunk, uploadData}))
-                )
-            }),
-            concatMap(({fileUploadChunk, uploadData}) => {
-                console.log(`uploading chunk ${uploadData.chunk} of ${uploadData.name}`);
-                const path = fileUploadChunk.uploadPath;
-                const fileUpload = fileUploadChunk.fileUpload;
-                return this._fileSystemService.uploadFileWithProgress(path, uploadData).pipe(
-                    concatMap(uploadProgress => {
-                        if (uploadProgress.fileStats) {
-                            fileUploadChunk.progress = 100;
-                            return of(uploadProgress.fileStats)
-                        } else {
-                            console.log(`Chunk progress = ${uploadProgress.progress}`);
-                            fileUploadChunk.progress = uploadProgress.progress;
+                return from(chunks).pipe(
+                    concatMap(fileUploadChunk => {
+                        return from(this._getFileContent(fileUploadChunk.blob)).pipe(
+                            map(content => ({content, chunk: fileUploadChunk.chunkIndex, name: fileUploadChunk.fileName, format: 'base64', type: 'file'} as UploadData)),
+                            map(uploadData => ({fileUploadChunk: fileUploadChunk, uploadData}))
+                        )
+                    }),
+                    concatMap(({fileUploadChunk, uploadData}) => {
+                        const path = fileUploadChunk.uploadPath;
+                        if (fileUpload.error) {
                             return EMPTY;
                         }
-                    }),
-                    catchError(error => {
-                        fileUploadChunk.progress = 100;
-                        fileUpload.error = error;
-                        return throwError(error);
+
+                        return this._fileSystemService.uploadFileWithProgress(path, uploadData).pipe(
+                            concatMap(uploadProgress => {
+                                if (uploadProgress.fileStats) {
+                                    fileUploadChunk.progress = 100;
+                                    if (fileUpload.progress === 100) {
+                                        return of({fileUpload, fileStats: uploadProgress.fileStats})
+
+                                    } else {
+                                        return EMPTY;
+                                    }
+                                } else {
+                                    fileUploadChunk.progress = uploadProgress.progress;
+                                    return EMPTY;
+                                }
+                            }),
+                            catchError(error => {
+                                fileUpload.progress = 100;
+                                fileUpload.error = error.statusText;
+                                return EMPTY;
+                            })
+                        );
                     })
                 );
             })
-        ).subscribe(fileStats => {
-            console.log(`Chunk completed for ${fileStats.path}, size = ${fileStats.size}`);
-            console.log(fileStats.name);
-        })
+        ).subscribe(({fileUpload, fileStats}) => {
+            console.log(`FileUpload completed for ${fileStats.path}, size = ${fileStats.size}`);
+        });
     }
 
 

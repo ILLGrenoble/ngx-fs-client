@@ -1,8 +1,8 @@
-import {HttpClient, HttpEvent, HttpEventType, HttpRequest} from '@angular/common/http';
+import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
 import {Inject, Injectable} from '@angular/core';
-import {catchError, concatMap, delay, EMPTY, filter, map, Observable, of, throwError} from 'rxjs';
+import {catchError, concatMap, EMPTY, map, Observable, of, throwError} from 'rxjs';
 import {
-    DirectoryContent,
+    DirectoryContent, DownloadProgress,
     FileContent,
     FileStats,
     UploadData,
@@ -47,7 +47,7 @@ export class VisaFileSystemService {
         );
     }
 
-    public downloadFileWithProgress(path: string): Observable<{progress: number, fileContent?: FileContent}> {
+    public downloadFileWithProgress(path: string): Observable<DownloadProgress> {
         const uriEncodedPath = encodeURI(path);
         const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
 
