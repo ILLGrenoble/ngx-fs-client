@@ -180,7 +180,15 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         }
     }
 
-    async onDrop(event: DndDropEvent): Promise<void> {
+    onDragOver(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    onDrop(event: DndDropEvent): void{
+        event.event.preventDefault();
+        event.event.stopPropagation();
+
         if (event.isExternal) {
             const uploadEvent = new UploadEvent({path: this.fileStats.path, files: event.event.dataTransfer.files});
             this.uploadEvent$.next(uploadEvent);

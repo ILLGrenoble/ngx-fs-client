@@ -24,4 +24,10 @@
     max-height: 398px;
     height: 100%;
     overflow-y: auto;
+    border: 3px solid transparent;
+    border-radius: 6px;
+
+    &__drag-over {
+        border: 3px dashed #cccccc;
+    }
 }

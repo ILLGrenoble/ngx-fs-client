@@ -160,6 +160,9 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             });
             this._uploadDialog.afterClosed().subscribe(() => {
                 this._uploadDialog = null;
+                if (uploadEvent.path === this.path$.getValue()) {
+                    this.linkedPath$.next(this.linkedPath$.getValue());
+                }
             });
         }
     }

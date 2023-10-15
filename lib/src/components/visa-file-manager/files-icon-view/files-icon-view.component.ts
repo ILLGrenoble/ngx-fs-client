@@ -5,6 +5,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
 import {VisaFileSystemService} from "../../../services";
 import {MatMenuTrigger} from "@angular/material/menu";
+import { DndDropEvent } from 'ngx-drag-drop';
 
 @Component({
     selector: 'files-icon-view',
@@ -51,11 +52,19 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     @Output()
     movedFile$: BehaviorSubject<MovedFile> = new BehaviorSubject<MovedFile>(null);
 
+    @Output()
+    dndTargetFolder$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+
     private _items: FileStats[] = [];
     private _destroy$: Subject<boolean> = new Subject<boolean>();
+    private _acceptDrop = false;
 
     get items(): FileStats[] {
         return this._items;
+    }
+
+    get acceptDrop(): boolean {
+        return this._acceptDrop;
     }
 
     constructor(private _dialog: MatDialog,
@@ -134,6 +143,26 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
             this._items = this._sortDirectoryContent([...this._items, fileStats]);
             this.renameInProgress$.next(fileStats);
         })
+    }
+
+    onDrop(event: DndDropEvent): void {
+        if (event.isExternal && this._acceptDrop) {
+            const uploadEvent = new UploadEvent({path: this.path$.getValue(), files: event.event.dataTransfer.files});
+            this.uploadEvent$.next(uploadEvent);
+            this._acceptDrop = false;
+        }
+    }
+
+    onDragOver(event: DragEvent): void {
+        if (event.dataTransfer.types.length === 1 && event.dataTransfer.types[0] === 'Files') {
+            this._acceptDrop = true;
+        } else {
+            this._acceptDrop = false;
+        }
+    }
+
+    onDragLeave(event: DragEvent): void {
+        this._acceptDrop = false;
     }
 
     private _moveFile(fileStats: FileStats, newPath: string): void {

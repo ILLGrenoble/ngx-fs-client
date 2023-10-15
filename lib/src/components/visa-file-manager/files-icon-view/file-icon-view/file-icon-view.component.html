@@ -8,6 +8,7 @@
          (contextmenu)="openMenu($event, menuTrigger)"
          [dndDraggable]="fileStats"
          [dndEffectAllowed]="'all'"
+         (dndDragover)="onDragOver($event)"
          (dndDrop)="onDrop($event)"
          (dndStart)="onDragStart()"
          [dndDisableDropIf]="fileStats.type === 'file'"
