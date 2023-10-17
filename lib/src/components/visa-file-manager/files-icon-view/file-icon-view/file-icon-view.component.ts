@@ -1,8 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import {FileStats, MovedFile, UploadEvent} from '../../../../models';
+import { FileStats, FileSystemAction, UploadEvent } from '../../../../models';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
-import {VisaFileSystemService} from "../../../../services";
 import { DndDropEvent } from 'ngx-drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -20,12 +19,6 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     fileStats: FileStats;
 
     @Input()
-    downloadFile$: Subject<FileStats>;
-
-    @Input()
-    deleteFile$: Subject<FileStats>;
-
-    @Input()
     doubleClickedFile$: Subject<FileStats>;
 
     @Input()
@@ -35,7 +28,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     renameInProgress$: BehaviorSubject<FileStats>;
 
     @Input()
-    movedFile$: BehaviorSubject<MovedFile>;
+    fileSystemAction$: Subject<FileSystemAction>;
 
     @Input()
     uploadEvent$: BehaviorSubject<UploadEvent>;
@@ -63,8 +56,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         return this._isFileNameEdit;
     }
 
-    constructor(private _fileSystemService: VisaFileSystemService,
-                private _sanitizer: DomSanitizer) {
+    constructor(private _sanitizer: DomSanitizer) {
     }
 
     ngOnInit() {
@@ -143,19 +135,10 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         if (this.fileStats.name !== this.fileName) {
             const oldPath = this.fileStats.path;
             const newPath = `${oldPath.substring(0, oldPath.lastIndexOf('/'))}/${this.fileName}`;
-            this._fileSystemService.moveFile(this.fileStats, newPath).subscribe({
-                next: (newFileStats) => {
-                    this.fileStats.name = newFileStats.name;
-                    this.fileStats.path = newFileStats.path;
-                    this.fileStats.last_modified = newFileStats.last_modified;
-                    this.fileName = newFileStats.name;
-                    this.renameInProgress$.next(null);
-                },
-                error: (error) => {
-                    console.log(`Cannot update filename: ${error.error}`);
-                    this.renameInProgress$.next(null);
-                }
-            })
+
+            this.fileSystemAction$.next(new FileSystemAction({fileStats: this.fileStats, path: newPath, type: 'MOVE'}));
+
+            this.renameInProgress$.next(null);
         } else {
             this.renameInProgress$.next(null);
         }
@@ -167,11 +150,11 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     downloadFile(): void {
-        this.downloadFile$.next(this.fileStats);
+        this.fileSystemAction$.next(new FileSystemAction({fileStats: this.fileStats, type: 'DOWNLOAD'}));
     }
 
     deleteFile(): void {
-        this.deleteFile$.next(this.fileStats);
+        this.fileSystemAction$.next(new FileSystemAction({fileStats: this.fileStats, type: 'DELETE'}));
     }
 
     onDragStart(): void {
@@ -195,7 +178,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
         } else {
             const fileStats = event.data;
-            this.movedFile$.next({file: fileStats, newPath: `${this.fileStats.path}/${fileStats.name}`});
+            this.fileSystemAction$.next(new FileSystemAction({fileStats, path: `${this.fileStats.path}/${fileStats.name}`, type: 'MOVE'}));
         }
     }
 }

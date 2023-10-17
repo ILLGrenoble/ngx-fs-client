@@ -1,9 +1,14 @@
-import {Component, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation} from '@angular/core';
-import {BehaviorSubject, filter, Subject, takeLast, takeUntil} from 'rxjs';
-import {DirectoryContent, FileStats, MovedFile, UploadEvent} from '../../../models';
+import { Component, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import { BehaviorSubject, filter, Observable, Subject, takeUntil } from 'rxjs';
+import {
+    DirectoryContent,
+    FileStats,
+    FileSystemAction,
+    FileSystemEvent,
+    UploadEvent
+} from '../../../models';
 import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
-import {VisaFileSystemService} from "../../../services";
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
 
@@ -32,10 +37,10 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     directoryContentLoading$: BehaviorSubject<boolean>;
 
     @Input()
-    downloadFile$: BehaviorSubject<FileStats>;
+    fileSystemAction$: Subject<FileSystemAction>;
 
     @Input()
-    deleteFile$: BehaviorSubject<FileStats>;
+    fileSystemEvent$: Observable<FileSystemEvent>;
 
     @Input()
     uploadEvent$: BehaviorSubject<UploadEvent>;
@@ -48,9 +53,6 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
 
     @Output()
     renameInProgress$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
-
-    @Output()
-    movedFile$: BehaviorSubject<MovedFile> = new BehaviorSubject<MovedFile>(null);
 
     @Output()
     dndTargetFolder$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
@@ -67,8 +69,7 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         return this._acceptDrop;
     }
 
-    constructor(private _dialog: MatDialog,
-                private _fileSystemService: VisaFileSystemService) {
+    constructor(private _dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -98,11 +99,19 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
             this._items = this._sortDirectoryContent(this._items);
         });
 
-        this.movedFile$.pipe(
+        this.fileSystemEvent$.pipe(
             takeUntil(this._destroy$),
             filter(data => data != null)
-        ).subscribe(movedFile => {
-            this._moveFile(movedFile.file, movedFile.newPath);
+        ).subscribe(event => {
+            if (event.type === 'CREATED') {
+                this._items = this._sortDirectoryContent([...this._items, event.fileStats]);
+                this.selectedFile$.next(event.fileStats);
+                this.renameInProgress$.next(event.fileStats);
+
+            } else if (event.type === 'MOVED') {
+                this.selectedFile$.next(event.fileStats);
+                // this._items = this._items.filter(item => item.path != event.fileStats.path);
+            }
         })
     }
 
@@ -115,7 +124,7 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         const dialogRef = this._dialog.open(DownloadFileDialogComponent, {data: {fileStats}});
         dialogRef.afterClosed().subscribe(res => {
             if (res) {
-                this.downloadFile$.next(fileStats)
+                this.fileSystemAction$.next(new FileSystemAction({fileStats, type: 'DOWNLOAD'}));
             }
         });
     }
@@ -132,17 +141,11 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     }
 
     onNewFile(): void {
-        this._fileSystemService.newFile(this.path$.getValue()).subscribe(fileStats => {
-            this._items = this._sortDirectoryContent([...this._items, fileStats]);
-            this.renameInProgress$.next(fileStats);
-        })
+        this.fileSystemAction$.next(new FileSystemAction({path: this.path$.getValue(), type: 'NEW_FILE'}));
     }
 
     onNewFolder(): void {
-        this._fileSystemService.newFolder(this.path$.getValue()).subscribe(fileStats => {
-            this._items = this._sortDirectoryContent([...this._items, fileStats]);
-            this.renameInProgress$.next(fileStats);
-        })
+        this.fileSystemAction$.next(new FileSystemAction({path: this.path$.getValue(), type: 'NEW_FOLDER'}));
     }
 
     onDrop(event: DndDropEvent): void {
@@ -163,17 +166,6 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
 
     onDragLeave(event: DragEvent): void {
         this._acceptDrop = false;
-    }
-
-    private _moveFile(fileStats: FileStats, newPath: string): void {
-        this._fileSystemService.moveFile(fileStats, newPath).subscribe({
-            next: () => {
-                this._items = this._items.filter(item => item.path != fileStats.path);
-            },
-            error: (error) => {
-                console.log(`Cannot move file: ${error.error}`);
-            }
-        })
     }
 
     private _sortDirectoryContent(items: FileStats[]): FileStats[] {

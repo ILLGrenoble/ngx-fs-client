@@ -1,7 +1,15 @@
-import {Component, Input, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { VisaFileSystemService } from '../../services';
-import {DirectoryContent, FileContent, FileStats, LinkedPath, UploadEvent} from '../../models';
+import {
+    DirectoryContent,
+    FileContent,
+    FileStats,
+    FileSystemAction,
+    FileSystemEvent,
+    LinkedPath,
+    UploadEvent
+} from '../../models';
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
 
@@ -23,10 +31,10 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     directoryContent$: BehaviorSubject<DirectoryContent> = new BehaviorSubject<DirectoryContent>(null);
 
     @Output()
-    downloadFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+    fileSystemAction$: BehaviorSubject<FileSystemAction> = new BehaviorSubject<FileSystemAction>(null);
 
     @Output()
-    deleteFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
+    fileSystemEvent$: EventEmitter<FileSystemEvent> = new EventEmitter<FileSystemEvent>();
 
     @Output()
     directoryContentLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -66,26 +74,34 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
                     finalize(() => this.directoryContentLoading$.next(false))
                 )
             })).subscribe({
-            next: (content) => {
-                this.directoryContent$.next(content);
-            },
-            error: (error) => {
-                console.error(error);
-            }
-        });
+                next: (content) => {
+                    this.directoryContent$.next(content);
+                },
+                error: (error) => {
+                    console.error(error);
+                }
+            });
 
-        this.downloadFile$.pipe(
+        this.fileSystemAction$.pipe(
             takeUntil(this._destroy$),
-            filter(fileStats => fileStats != null)
-        ).subscribe(fileStats => {
-            this.downloadFile(fileStats);
-        })
+            filter(fileSystemAction => fileSystemAction != null)
+        ).subscribe(action => {
+            if (action.type === 'DOWNLOAD') {
+                this._downloadFile(action.fileStats)
 
-        this.deleteFile$.pipe(
-            filter(fileStats => fileStats != null)
-        ).subscribe(fileStats => {
-            this.openDeleteFileDialog(fileStats)
-        });
+            } else if (action.type === 'DELETE') {
+                this._openDeleteFileDialog(action.fileStats)
+
+            } else if (action.type === 'NEW_FILE') {
+                this._createNewFile(action.path)
+
+            } else if (action.type === 'NEW_FOLDER') {
+                this._createNewFolder(action.path)
+
+            } else if (action.type === 'MOVE') {
+                this._moveFile(action.fileStats, action.path)
+            }
+        })
 
         this.uploadEvent$.pipe(
             takeUntil(this._destroy$),
@@ -100,7 +116,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         this._destroy$.unsubscribe();
     }
 
-    downloadFile(fileStats: FileStats): void {
+    private _downloadFile(fileStats: FileStats): void {
 
         const downloadProgress$ = new BehaviorSubject<{progress: number, error?: string}>({progress: 0})
         const dialogRef = this._dialog.open(FileDownloadingDialogComponent, {data: {fileStats, downloadProgress$}});
@@ -139,7 +155,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     }
 
-    openDeleteFileDialog(fileStats: FileStats) {
+    private _openDeleteFileDialog(fileStats: FileStats) {
         const dialogRef = this._dialog.open(DeleteFileDialogComponent, {data: {fileStats}});
         dialogRef.afterClosed().subscribe(res => {
             if (res) {
@@ -150,6 +166,31 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
                 })
             }
         });
+    }
+
+    private _createNewFile(path: string): void {
+        this._fileSystemService.newFile(path).subscribe(fileStats => {
+            this.fileSystemEvent$.emit(new FileSystemEvent({fileStats, type: 'CREATED'}));
+        })
+    }
+
+    private _createNewFolder(path: string): void {
+        this._fileSystemService.newFolder(path).subscribe(fileStats => {
+            this.fileSystemEvent$.emit(new FileSystemEvent({fileStats, type: 'CREATED'}));
+        })
+    }
+
+    private _moveFile(fileStats: FileStats, newPath: string): void {
+        this._fileSystemService.moveFile(fileStats, newPath).subscribe({
+            next: (newFileStats) => {
+                this.linkedPath$.next(this.linkedPath$.getValue());
+
+                this.fileSystemEvent$.emit(new FileSystemEvent({fileStats: newFileStats, type: 'MOVED'}));
+            },
+            error: (error) => {
+                console.log(`Cannot move file: ${error.error}`);
+            }
+        })
     }
 
     private _handleUpload(uploadEvent: UploadEvent): void {
