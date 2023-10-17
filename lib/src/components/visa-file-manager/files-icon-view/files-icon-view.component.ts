@@ -5,7 +5,6 @@ import {
     FileStats,
     FileSystemAction,
     FileSystemEvent,
-    UploadEvent
 } from '../../../models';
 import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
@@ -44,17 +43,9 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     fileSystemEvent$: Observable<FileSystemEvent>;
 
     @Output()
-    selectedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
-
-    @Output()
-    doubleClickedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
-
-    @Output()
     renameInProgress$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
 
-    @Output()
-    dndTargetFolder$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
-
+    private _selectedFile: FileStats;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _acceptDrop = false;
 
@@ -66,32 +57,28 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         return this._acceptDrop;
     }
 
+    get selectedFile(): FileStats {
+        return this._selectedFile;
+    }
+
+    set selectedFile(value: FileStats) {
+        this._selectedFile = value;
+    }
+
     constructor(private _dialog: MatDialog) {
     }
 
     ngOnInit() {
-        this.doubleClickedFile$.pipe(
-            takeUntil(this._destroy$),
-            filter(fileStats => fileStats != null)
-        ).subscribe(fileStats => {
-            if (fileStats.type === 'directory') {
-                this.pathChange.emit(fileStats.path);
-
-            } else {
-                this.openDownloadFileDialog(fileStats)
-            }
-        });
-
         this.fileSystemEvent$.pipe(
             takeUntil(this._destroy$),
             filter(data => data != null)
         ).subscribe(event => {
             if (event.type === 'CREATED') {
-                this.selectedFile$.next(event.fileStats);
+                this._selectedFile = event.fileStats;
                 this.renameInProgress$.next(event.fileStats);
 
             } else if (event.type === 'MOVED') {
-                this.selectedFile$.next(event.fileStats);
+                this._selectedFile = event.fileStats;
             }
         })
     }
@@ -131,6 +118,15 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
 
     onNewFolder(): void {
         this.fileSystemAction.emit(new FileSystemAction({path: this.path, type: 'NEW_FOLDER'}));
+    }
+
+    onFileDoubleClick(fileStats: FileStats): void {
+        if (fileStats.type === 'directory') {
+            this.pathChange.emit(fileStats.path);
+
+        } else {
+            this.openDownloadFileDialog(fileStats)
+        }
     }
 
     onDrop(event: DndDropEvent): void {

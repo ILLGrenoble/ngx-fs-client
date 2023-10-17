@@ -7,8 +7,7 @@ import {
     FileStats,
     FileSystemAction,
     FileSystemEvent,
-    LinkedPath,
-    UploadEvent
+    LinkedPath
 } from '../../models';
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";

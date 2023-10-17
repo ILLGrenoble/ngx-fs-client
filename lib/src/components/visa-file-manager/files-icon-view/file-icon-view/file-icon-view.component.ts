@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import { FileStats, FileSystemAction, UploadEvent } from '../../../../models';
+import { FileStats, FileSystemAction } from '../../../../models';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
@@ -18,11 +18,14 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     @Input()
     fileStats: FileStats;
 
-    @Input()
-    doubleClickedFile$: Subject<FileStats>;
+    @Output()
+    doubleClickedFile = new EventEmitter<FileStats>();
 
     @Input()
-    selectedFile$: BehaviorSubject<FileStats>;
+    selectedFile: FileStats;
+
+    @Output()
+    selectedFileChange = new EventEmitter<FileStats>();
 
     @Input()
     renameInProgress$: BehaviorSubject<FileStats>;
@@ -46,7 +49,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     get selected(): boolean {
-        return this._selected;
+        return (this.selectedFile != null && this.selectedFile.path === this.fileStats.path)
     }
 
     get isFileNameEdit(): boolean {
@@ -57,12 +60,6 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.selectedFile$.pipe(
-            takeUntil(this._destroy$)
-        ).subscribe(fileStats => {
-            this._selected = (fileStats !== null && fileStats.path === this.fileStats.path);
-        });
-
         this.fileName = this.fileStats.name;
 
         this.renameInProgress$.pipe(
@@ -81,30 +78,28 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         this._isSingleClick = false;
 
         if (!this.renameInProgress$.getValue()) {
-            this.selectedFile$.next(this.fileStats);
-            this.doubleClickedFile$.next(this.fileStats);
+            this.selectedFileChange.emit(this.fileStats);
+            this.doubleClickedFile.emit(this.fileStats);
         }
     }
 
     onSelect(): void {
         this._isSingleClick = true;
-        setTimeout(() => {
-            if(this._isSingleClick){
-                if (!this.renameInProgress$.getValue()) {
-                    if (this.selectedFile$.getValue() != null && this.selectedFile$.getValue() === this.fileStats) {
+        if (this.selectedFile != null && this.selectedFile === this.fileStats) {
+            setTimeout(() => {
+                if (this._isSingleClick) {
+                    if (!this.renameInProgress$.getValue()) {
                         this.editFileName();
-
-                    } else {
-                        this.selectedFile$.next(this.fileStats);
                     }
                 }
-            }
-        }, 250)
+            }, 250)
+        }
+        this.selectedFileChange.emit(this.fileStats);
     }
 
     openMenu(event: Event, viewChild: MatMenuTrigger): void {
-        if (this.selectedFile$.getValue() == null || this.selectedFile$.getValue() !== this.fileStats) {
-            this.selectedFile$.next(this.fileStats);
+        if (this.selectedFile == null || this.selectedFile !== this.fileStats) {
+            this.selectedFileChange.emit(this.fileStats);
         }
         event.preventDefault();
         event.stopPropagation();
@@ -155,8 +150,8 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     onDragStart(): void {
-        if (this.selectedFile$.getValue() == null || this.selectedFile$.getValue() !== this.fileStats) {
-            this.selectedFile$.next(this.fileStats);
+        if (this.selectedFile == null || this.selectedFile !== this.fileStats) {
+            this.selectedFileChange.emit(this.fileStats);
         }
     }
 

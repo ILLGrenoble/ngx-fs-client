@@ -15,8 +15,8 @@
         <div *ngFor="let item of items; ">
             <file-icon-view
                 [fileStats]="item"
-                [doubleClickedFile$]="doubleClickedFile$"
-                [selectedFile$]="selectedFile$"
+                (doubleClickedFile)="onFileDoubleClick($event)"
+                [(selectedFile)]="selectedFile"
                 [renameInProgress$]="renameInProgress$"
                 (fileSystemAction)="onFileSystemAction($event)"
             ></file-icon-view>
