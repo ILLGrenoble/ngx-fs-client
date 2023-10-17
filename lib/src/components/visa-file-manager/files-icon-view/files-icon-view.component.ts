@@ -42,10 +42,8 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     @Input()
     fileSystemEvent$: Observable<FileSystemEvent>;
 
-    @Output()
-    renameInProgress$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
-
     private _selectedFile: FileStats;
+    private _renameInProgress: FileStats;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _acceptDrop = false;
 
@@ -65,6 +63,14 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         this._selectedFile = value;
     }
 
+    get renameInProgress(): FileStats {
+        return this._renameInProgress;
+    }
+
+    set renameInProgress(value: FileStats) {
+        this._renameInProgress = value;
+    }
+
     constructor(private _dialog: MatDialog) {
     }
 
@@ -75,7 +81,7 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         ).subscribe(event => {
             if (event.type === 'CREATED') {
                 this._selectedFile = event.fileStats;
-                this.renameInProgress$.next(event.fileStats);
+                this._renameInProgress = event.fileStats;
 
             } else if (event.type === 'MOVED') {
                 this._selectedFile = event.fileStats;
@@ -127,6 +133,11 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         } else {
             this.openDownloadFileDialog(fileStats)
         }
+    }
+
+    onClick(): void {
+        this._selectedFile = null;
+        this._renameInProgress = null;
     }
 
     onDrop(event: DndDropEvent): void {

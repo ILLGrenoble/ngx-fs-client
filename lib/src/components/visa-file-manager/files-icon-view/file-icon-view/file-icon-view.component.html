@@ -4,7 +4,7 @@
     <div class="visa-fs-file-icon-view-inner"
          [ngClass]="{'visa-fs-file-icon-view-inner__selected': selected}"
          (dblclick)="onDoubleClicked()"
-         (click)="onSelect()"
+         (click)="onSelect($event)"
          (contextmenu)="openMenu($event, menuTrigger)"
          [dndDraggable]="fileStats"
          [dndEffectAllowed]="'all'"
@@ -24,8 +24,8 @@
         <input type="text" #fileNameInput class="visa-fs-file-icon-view-name-edit" [ngClass]="{'visa-fs-hidden': !isFileNameEdit}"
                [(ngModel)]="fileName"
                (keydown.enter)="updateFileName()"
-               (keydown.escape)="cancelFileNameChange()"
-               (blur)="cancelFileNameChange()">
+               (keydown.escape)="cancelFileNameChange()">
+<!--               (blur)="cancelFileNameChange()">-->
 
         <div class="visa-fs-file-icon-view-name" [ngClass]="{'visa-fs-hidden': isFileNameEdit, 'visa-fs-file-icon-view-name__selected': selected}">
 

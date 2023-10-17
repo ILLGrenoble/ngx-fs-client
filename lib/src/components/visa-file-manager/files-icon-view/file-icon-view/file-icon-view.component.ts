@@ -21,21 +21,42 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     @Output()
     doubleClickedFile = new EventEmitter<FileStats>();
 
+    get selectedFile(): FileStats {
+        return this._selectedFile;
+    }
+
     @Input()
-    selectedFile: FileStats;
+    set selectedFile(fileStats: FileStats) {
+        this._selectedFile = fileStats;
+        if (fileStats == null || (this._isFileNameEdit && fileStats.path !== this.fileStats.path)) {
+            this._isFileNameEdit = false;
+            this.fileName = this.fileStats.name;
+        }
+    }
 
     @Output()
     selectedFileChange = new EventEmitter<FileStats>();
 
+    get renameInProgress(): FileStats {
+        return this._renameInProgress;
+    }
+
     @Input()
-    renameInProgress$: BehaviorSubject<FileStats>;
+    set renameInProgress(fileStats: FileStats) {
+        this._renameInProgress = fileStats;
+        this.setFileNameEditActive(fileStats != null && this.fileStats != null && fileStats.path === this.fileStats.path)
+    }
+
+    @Output()
+    renameInProgressChange = new EventEmitter<FileStats>();
 
     @Output()
     fileSystemAction = new EventEmitter<FileSystemAction>();
 
-    private _selected: boolean = false;
     private _isSingleClick: Boolean = true;
 
+    private _selectedFile: FileStats;
+    private _renameInProgress: FileStats;
     private _isFileNameEdit: boolean = false;
     private _fileName: string;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
@@ -61,12 +82,6 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.fileName = this.fileStats.name;
-
-        this.renameInProgress$.pipe(
-            takeUntil(this._destroy$)
-        ).subscribe(fileStats => {
-            this.setFileNameEditActive(fileStats != null && fileStats.path === this.fileStats.path)
-        })
     }
 
     ngOnDestroy(): void {
@@ -77,18 +92,21 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     onDoubleClicked(): void {
         this._isSingleClick = false;
 
-        if (!this.renameInProgress$.getValue()) {
+        if (!this.renameInProgress) {
             this.selectedFileChange.emit(this.fileStats);
             this.doubleClickedFile.emit(this.fileStats);
         }
     }
 
-    onSelect(): void {
+    onSelect(event: Event): void {
+        event.preventDefault();
+        event.stopPropagation();
+
         this._isSingleClick = true;
         if (this.selectedFile != null && this.selectedFile === this.fileStats) {
             setTimeout(() => {
                 if (this._isSingleClick) {
-                    if (!this.renameInProgress$.getValue()) {
+                    if (!this._isFileNameEdit) {
                         this.editFileName();
                     }
                 }
@@ -107,9 +125,8 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     editFileName(): void {
-        if (this.renameInProgress$.getValue() !== this.fileStats) {
-            this.renameInProgress$.next(this.fileStats);
-        }
+        this.renameInProgressChange.emit(this.fileStats);
+        this._isFileNameEdit = true;
     }
 
     setFileNameEditActive(active: boolean) {
@@ -130,15 +147,17 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
             this.fileSystemAction.emit(new FileSystemAction({fileStats: this.fileStats, path: newPath, type: 'MOVE'}));
 
-            this.renameInProgress$.next(null);
+            this.renameInProgressChange.emit(null);
+
         } else {
-            this.renameInProgress$.next(null);
+            this.renameInProgressChange.emit(null);
         }
     }
 
     cancelFileNameChange(): void {
         this.fileName = this.fileStats.name;
-        this.renameInProgress$.next(null);
+        console.log('cancel file name change');
+        this.renameInProgressChange.emit(null);
     }
 
     downloadFile(): void {
