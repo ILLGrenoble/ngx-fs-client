@@ -18,8 +18,7 @@
                 [doubleClickedFile$]="doubleClickedFile$"
                 [selectedFile$]="selectedFile$"
                 [renameInProgress$]="renameInProgress$"
-                [fileSystemAction$]="fileSystemAction$"
-                [uploadEvent$]="uploadEvent$"
+                (fileSystemAction)="onFileSystemAction($event)"
             ></file-icon-view>
         </div>
     </div>

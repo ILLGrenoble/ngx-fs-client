@@ -21,14 +21,9 @@ import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDia
 })
 export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
-    @Output()
-    linkedPath$: BehaviorSubject<LinkedPath> = new BehaviorSubject<LinkedPath>(new LinkedPath({name: ''}));
 
     @Output()
     directoryContent: DirectoryContent = null;
-
-    @Output()
-    fileSystemAction$: BehaviorSubject<FileSystemAction> = new BehaviorSubject<FileSystemAction>(null);
 
     @Output()
     fileSystemEvent$: EventEmitter<FileSystemEvent> = new EventEmitter<FileSystemEvent>();
@@ -36,15 +31,13 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     @Output()
     directoryContentLoading = false;
 
-    @Output()
-    uploadEvent$: BehaviorSubject<UploadEvent> = new BehaviorSubject<UploadEvent>(null);
-
+    private _linkedPath: LinkedPath = new LinkedPath({name: ''});
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
     private _showHidden = false;
 
     get path(): string {
-        let path = this.linkedPath$.getValue().name;
+        let path = this._linkedPath.name;
 
         if (!path.startsWith('/')) {
             path = `/${path}`;
@@ -54,12 +47,21 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     }
 
     set path(path: string) {
-        const currentPath = this.linkedPath$.getValue();
+        const currentPath = this.linkedPath;
         if (path != null && path != currentPath.name) {
             const linkedPath = new LinkedPath({name: path, previous: currentPath});
             currentPath.next = linkedPath;
-            this.linkedPath$.next(linkedPath);
+            this.linkedPath = linkedPath;
         }
+    }
+
+    get linkedPath(): LinkedPath {
+        return this._linkedPath;
+    }
+
+    set linkedPath(linkedPath: LinkedPath) {
+        this._linkedPath = linkedPath;
+        this._reloadDirectory();
     }
 
     constructor(private _fileSystemService: VisaFileSystemService,
@@ -67,39 +69,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.linkedPath$.pipe(
-                takeUntil(this._destroy$)
-            ).subscribe(() => {
-                this._reloadDirectory();
-        });
-
-        this.fileSystemAction$.pipe(
-            takeUntil(this._destroy$),
-            filter(fileSystemAction => fileSystemAction != null)
-        ).subscribe(action => {
-            if (action.type === 'DOWNLOAD') {
-                this._downloadFile(action.fileStats)
-
-            } else if (action.type === 'DELETE') {
-                this._openDeleteFileDialog(action.fileStats)
-
-            } else if (action.type === 'NEW_FILE') {
-                this._createNewFile(action.path)
-
-            } else if (action.type === 'NEW_FOLDER') {
-                this._createNewFolder(action.path)
-
-            } else if (action.type === 'MOVE') {
-                this._moveFile(action.fileStats, action.path)
-            }
-        })
-
-        this.uploadEvent$.pipe(
-            takeUntil(this._destroy$),
-            filter(uploadEvent => uploadEvent != null)
-        ).subscribe(uploadEvent => {
-            this._handleUpload(uploadEvent);
-        })
+        this._reloadDirectory();
     }
 
     ngOnDestroy(): void {
@@ -107,9 +77,33 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         this._destroy$.unsubscribe();
     }
 
+    onFileSystemAction(action: FileSystemAction) {
+        if (action == null) {
+            return;
+        }
+
+        if (action.type === 'DOWNLOAD') {
+            this._downloadFile(action.fileStats)
+
+        } else if (action.type === 'DELETE') {
+            this._openDeleteFileDialog(action.fileStats)
+
+        } else if (action.type === 'NEW_FILE') {
+            this._createNewFile(action.path)
+
+        } else if (action.type === 'NEW_FOLDER') {
+            this._createNewFolder(action.path)
+
+        } else if (action.type === 'MOVE') {
+            this._moveFile(action.fileStats, action.path)
+
+        } else if (action.type === 'UPLOAD') {
+            this._handleUpload(action.files, action.path);
+        }
+    }
+
     private _reloadDirectory(): void {
-        const linkedPath = this.linkedPath$.getValue();
-        const path = linkedPath.name;
+        const path = this._linkedPath.name;
 
         this.directoryContentLoading = true;
 
@@ -208,15 +202,15 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         })
     }
 
-    private _handleUpload(uploadEvent: UploadEvent): void {
+    private _handleUpload(files: FileList, path: string): void {
         if (this._uploadDialog == null) {
             this._uploadDialog = this._dialog.open(FileUploadDialogComponent, {
                 width: '800px',
-                data: {uploadEvent$: this.uploadEvent$, fileSystemService: this._fileSystemService}
+                data: {files, path, fileSystemService: this._fileSystemService}
             });
             this._uploadDialog.afterClosed().subscribe(() => {
                 this._uploadDialog = null;
-                if (uploadEvent.path === this.path) {
+                if (path === this.path) {
                     this._reloadDirectory();
                 }
             });

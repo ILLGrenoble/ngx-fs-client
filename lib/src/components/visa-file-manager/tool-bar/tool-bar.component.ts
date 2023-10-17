@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LinkedPath } from '../../../models/linked-path.model';
 
@@ -8,37 +8,42 @@ import { LinkedPath } from '../../../models/linked-path.model';
     styleUrls: ['./tool-bar.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class ToolBarComponent implements OnInit {
+export class ToolBarComponent {
+
+    get linkedPath(): LinkedPath {
+        return this._linkedPath;
+    }
 
     @Input()
-    linkedPath$: BehaviorSubject<LinkedPath>;
+    set linkedPath(linkedPath: LinkedPath) {
+        this._linkedPath = linkedPath;
+        const path = linkedPath.name;
+        let basename = path.split('/').pop();
+        if (basename === ''){
+            basename = 'Home';
+        }
+        this._basename = basename;
+    }
 
+    @Output()
+    linkedPathChange = new EventEmitter<LinkedPath>();
+
+    private _linkedPath: LinkedPath;
     private _basename = '';
 
     get basename(): string {
         return this._basename;
     }
 
-    ngOnInit() {
-        this.linkedPath$.subscribe(linkedPath => {
-            const path = linkedPath.name;
-            let basename = path.split('/').pop();
-            if (basename === ''){
-                basename = 'Home';
-            }
-            this._basename = basename;
-        });
-    }
-
     onBackClick(): void {
-        if (this.linkedPath$.getValue().previous) {
-            this.linkedPath$.next(this.linkedPath$.getValue().previous)
+        if (this._linkedPath.previous) {
+            this.linkedPathChange.emit(this.linkedPath.previous);
         }
     }
 
     onForwardClick(): void {
-        if (this.linkedPath$.getValue().next) {
-            this.linkedPath$.next(this.linkedPath$.getValue().next)
+        if (this._linkedPath.next) {
+            this.linkedPathChange.emit(this.linkedPath.next);
         }
     }
 

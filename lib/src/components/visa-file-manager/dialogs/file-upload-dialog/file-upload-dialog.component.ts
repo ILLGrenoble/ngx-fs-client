@@ -1,18 +1,15 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {FileStats, FileUpload, UploadData, UploadEvent} from "../../../../models";
+import {FileUpload, UploadData} from "../../../../models";
 import {
-    BehaviorSubject,
     catchError,
     concatMap,
     EMPTY,
-    filter,
     from,
     map,
     of,
     Subject,
     takeUntil,
-    throwError
 } from 'rxjs';
 import {VisaFileSystemService} from "../../../../services";
 
@@ -23,13 +20,18 @@ import {VisaFileSystemService} from "../../../../services";
 })
 export class FileUploadDialogComponent implements OnInit, OnDestroy {
 
-    private readonly _uploadEvent$: BehaviorSubject<UploadEvent>;
+    private readonly _files: FileList;
+    private readonly _path: string;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _completed: boolean = false;
     private _cancelled: boolean = false;
     private _fileSystemService: VisaFileSystemService;
 
     private _fileUploads: FileUpload[] = [];
+
+    get path(): string {
+        return this._path;
+    }
 
     get fileUploads(): FileUpload[] {
         return this._fileUploads;
@@ -45,32 +47,28 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
 
     constructor(public dialogRef: MatDialogRef<FileUploadDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) data: {
-                    uploadEvent$: BehaviorSubject<UploadEvent>,
+                    files: FileList,
+                    path: string,
                     fileSystemService: VisaFileSystemService}) {
-        this._uploadEvent$ = data.uploadEvent$;
+        this._files = data.files;
+        this._path = data.path;
         this._fileSystemService = data.fileSystemService;
     }
 
     ngOnInit(): void {
-        this._uploadEvent$.pipe(
-            takeUntil(this._destroy$),
-            filter(uploadEvent => uploadEvent != null),
-            concatMap(uploadEvent => {
-                const fileUploads = [];
-                for (let i = 0; i < uploadEvent.files.length; i++) {
-                    const file = uploadEvent.files[i];
-                    const fileUpload = new FileUpload({
-                        file: file,
-                        uploadPath: uploadEvent.path
-                    });
+        const fileUploads = [];
+        for (let i = 0; i < this._files.length; i++) {
+            const file = this._files[i];
+            const fileUpload = new FileUpload({
+                file: file,
+                uploadPath: this._path
+            });
 
-                    this._fileUploads.push(fileUpload);
-                    fileUploads.push(fileUpload)
-                }
-                return from(fileUploads);
-            }),
+            this._fileUploads.push(fileUpload);
+            fileUploads.push(fileUpload)
+        }
+        from(fileUploads).pipe(
             concatMap(fileUpload => {
-                console.log(`Uploading ${fileUpload.file.name}`);
                 const chunks = fileUpload.createChunks();
                 return from(chunks).pipe(
                     concatMap(fileUploadChunk => {
@@ -111,8 +109,8 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
                 );
             }),
             takeUntil(this._destroy$),
+
         ).subscribe(({fileUpload, fileStats}) => {
-            console.log(`FileUpload completed for ${fileStats.path}, size = ${fileStats.size}`);
             this._completed = this._fileUploads.find(fileUpload => fileUpload.progress !== 100) == null;
         });
     }

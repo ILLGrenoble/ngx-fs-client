@@ -37,14 +37,11 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     @Input()
     directoryContentLoading: boolean;
 
-    @Input()
-    fileSystemAction$: Subject<FileSystemAction>;
+    @Output()
+    fileSystemAction = new EventEmitter<FileSystemAction>();
 
     @Input()
     fileSystemEvent$: Observable<FileSystemEvent>;
-
-    @Input()
-    uploadEvent$: BehaviorSubject<UploadEvent>;
 
     @Output()
     selectedFile$: BehaviorSubject<FileStats> = new BehaviorSubject<FileStats>(null);
@@ -108,7 +105,7 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         const dialogRef = this._dialog.open(DownloadFileDialogComponent, {data: {fileStats}});
         dialogRef.afterClosed().subscribe(res => {
             if (res) {
-                this.fileSystemAction$.next(new FileSystemAction({fileStats, type: 'DOWNLOAD'}));
+                this.fileSystemAction.emit(new FileSystemAction({fileStats, type: 'DOWNLOAD'}));
             }
         });
     }
@@ -124,18 +121,21 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         this._contextMenu.openMenu();
     }
 
+    onFileSystemAction(action: FileSystemAction) {
+        this.fileSystemAction.emit(action);
+    }
+
     onNewFile(): void {
-        this.fileSystemAction$.next(new FileSystemAction({path: this.path, type: 'NEW_FILE'}));
+        this.fileSystemAction.emit(new FileSystemAction({path: this.path, type: 'NEW_FILE'}));
     }
 
     onNewFolder(): void {
-        this.fileSystemAction$.next(new FileSystemAction({path: this.path, type: 'NEW_FOLDER'}));
+        this.fileSystemAction.emit(new FileSystemAction({path: this.path, type: 'NEW_FOLDER'}));
     }
 
     onDrop(event: DndDropEvent): void {
         if (event.isExternal && this._acceptDrop) {
-            const uploadEvent = new UploadEvent({path: this.path, files: event.event.dataTransfer.files});
-            this.uploadEvent$.next(uploadEvent);
+            this.fileSystemAction.emit(new FileSystemAction({path: this.path, files: event.event.dataTransfer.files, type: 'UPLOAD'}));
             this._acceptDrop = false;
         }
     }

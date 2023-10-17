@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import { FileStats, FileSystemAction, UploadEvent } from '../../../../models';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
@@ -27,11 +27,8 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     @Input()
     renameInProgress$: BehaviorSubject<FileStats>;
 
-    @Input()
-    fileSystemAction$: Subject<FileSystemAction>;
-
-    @Input()
-    uploadEvent$: BehaviorSubject<UploadEvent>;
+    @Output()
+    fileSystemAction = new EventEmitter<FileSystemAction>();
 
     private _selected: boolean = false;
     private _isSingleClick: Boolean = true;
@@ -136,7 +133,7 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
             const oldPath = this.fileStats.path;
             const newPath = `${oldPath.substring(0, oldPath.lastIndexOf('/'))}/${this.fileName}`;
 
-            this.fileSystemAction$.next(new FileSystemAction({fileStats: this.fileStats, path: newPath, type: 'MOVE'}));
+            this.fileSystemAction.emit(new FileSystemAction({fileStats: this.fileStats, path: newPath, type: 'MOVE'}));
 
             this.renameInProgress$.next(null);
         } else {
@@ -150,11 +147,11 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
     }
 
     downloadFile(): void {
-        this.fileSystemAction$.next(new FileSystemAction({fileStats: this.fileStats, type: 'DOWNLOAD'}));
+        this.fileSystemAction.emit(new FileSystemAction({fileStats: this.fileStats, type: 'DOWNLOAD'}));
     }
 
     deleteFile(): void {
-        this.fileSystemAction$.next(new FileSystemAction({fileStats: this.fileStats, type: 'DELETE'}));
+        this.fileSystemAction.emit(new FileSystemAction({fileStats: this.fileStats, type: 'DELETE'}));
     }
 
     onDragStart(): void {
@@ -173,12 +170,11 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         event.event.stopPropagation();
 
         if (event.isExternal) {
-            const uploadEvent = new UploadEvent({path: this.fileStats.path, files: event.event.dataTransfer.files});
-            this.uploadEvent$.next(uploadEvent);
+            this.fileSystemAction.emit(new FileSystemAction({path: this.fileStats.path, files: event.event.dataTransfer.files, type: 'UPLOAD'}));
 
         } else {
             const fileStats = event.data;
-            this.fileSystemAction$.next(new FileSystemAction({fileStats, path: `${this.fileStats.path}/${fileStats.name}`, type: 'MOVE'}));
+            this.fileSystemAction.emit(new FileSystemAction({fileStats, path: `${this.fileStats.path}/${fileStats.name}`, type: 'MOVE'}));
         }
     }
 }

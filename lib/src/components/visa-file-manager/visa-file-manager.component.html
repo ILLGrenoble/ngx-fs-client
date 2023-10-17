@@ -1,13 +1,12 @@
 <div class="visa-fs-file-manager-container">
-    <tool-bar [linkedPath$]="linkedPath$"></tool-bar>
+    <tool-bar [(linkedPath)]="linkedPath"></tool-bar>
     <path-bar [path]="path"></path-bar>
     <files-icon-view
         [(path)]="path"
         [directoryContent]="directoryContent"
         [directoryContentLoading]="directoryContentLoading"
-        [fileSystemAction$]="fileSystemAction$"
+        (fileSystemAction)="onFileSystemAction($event)"
         [fileSystemEvent$]="fileSystemEvent$"
-        [uploadEvent$]="uploadEvent$"
     ></files-icon-view>
 
 </div>
