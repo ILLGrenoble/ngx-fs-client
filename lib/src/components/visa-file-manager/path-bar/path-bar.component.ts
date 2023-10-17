@@ -7,23 +7,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
     styleUrls: ['./path-bar.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class PathBarComponent implements OnInit {
+export class PathBarComponent {
 
     @Input()
-    path$: Observable<string>;
+    path: string;
 
-    private _path: string;
-
-    get path(): string {
-        return this._path;
-    }
-
-    ngOnInit() {
-        this.path$.subscribe(path => {
-            if (!path.startsWith('/')) {
-                path = `/${path}`;
-            }
-            this._path = path;
-        });
-    }
 }

@@ -22,13 +22,10 @@ import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDia
 export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     @Output()
-    path$: BehaviorSubject<string> = new BehaviorSubject<string>('');
-
-    @Output()
     linkedPath$: BehaviorSubject<LinkedPath> = new BehaviorSubject<LinkedPath>(new LinkedPath({name: ''}));
 
     @Output()
-    directoryContent$: BehaviorSubject<DirectoryContent> = new BehaviorSubject<DirectoryContent>(null);
+    directoryContent: DirectoryContent = null;
 
     @Output()
     fileSystemAction$: BehaviorSubject<FileSystemAction> = new BehaviorSubject<FileSystemAction>(null);
@@ -37,50 +34,44 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     fileSystemEvent$: EventEmitter<FileSystemEvent> = new EventEmitter<FileSystemEvent>();
 
     @Output()
-    directoryContentLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    directoryContentLoading = false;
 
     @Output()
     uploadEvent$: BehaviorSubject<UploadEvent> = new BehaviorSubject<UploadEvent>(null);
 
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
+    private _showHidden = false;
+
+    get path(): string {
+        let path = this.linkedPath$.getValue().name;
+
+        if (!path.startsWith('/')) {
+            path = `/${path}`;
+        }
+
+        return path;
+    }
+
+    set path(path: string) {
+        const currentPath = this.linkedPath$.getValue();
+        if (path != null && path != currentPath.name) {
+            const linkedPath = new LinkedPath({name: path, previous: currentPath});
+            currentPath.next = linkedPath;
+            this.linkedPath$.next(linkedPath);
+        }
+    }
 
     constructor(private _fileSystemService: VisaFileSystemService,
                 private _dialog: MatDialog) {
     }
 
     ngOnInit(): void {
-        this.path$.pipe(
-            takeUntil(this._destroy$),
-            filter(path => path != null),
-            filter(path => {
-                const currentPath = this.linkedPath$.getValue();
-                return path != currentPath.name;
-            })
-        ).subscribe(path => {
-            const currentPath = this.linkedPath$.getValue();
-            const linkedPath = new LinkedPath({name: path, previous: currentPath});
-            currentPath.next = linkedPath;
-            this.linkedPath$.next(linkedPath);
-        });
-
         this.linkedPath$.pipe(
-            takeUntil(this._destroy$),
-            switchMap(path => {
-                this.directoryContentLoading$.next(true);
-                this.path$.next(path.name);
-                return this._fileSystemService.getDirectoryContent(path.name).pipe(
-                    takeUntil(this._destroy$),
-                    finalize(() => this.directoryContentLoading$.next(false))
-                )
-            })).subscribe({
-                next: (content) => {
-                    this.directoryContent$.next(content);
-                },
-                error: (error) => {
-                    console.error(error);
-                }
-            });
+                takeUntil(this._destroy$)
+            ).subscribe(() => {
+                this._reloadDirectory();
+        });
 
         this.fileSystemAction$.pipe(
             takeUntil(this._destroy$),
@@ -114,6 +105,28 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this._destroy$.next(true);
         this._destroy$.unsubscribe();
+    }
+
+    private _reloadDirectory(): void {
+        const linkedPath = this.linkedPath$.getValue();
+        const path = linkedPath.name;
+
+        this.directoryContentLoading = true;
+
+        this._fileSystemService.getDirectoryContent(path).pipe(
+            takeUntil(this._destroy$),
+            finalize(() => {
+                this.directoryContentLoading = false;
+            })
+        ).subscribe({
+            next: (content) => {
+                content.content = this._sortDirectoryContent(content.content);
+                this.directoryContent = content;
+            },
+            error: (error) => {
+                console.error(error);
+            }
+        });
     }
 
     private _downloadFile(fileStats: FileStats): void {
@@ -161,7 +174,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             if (res) {
                 this._fileSystemService.deleteFileOrFolder(fileStats).subscribe(success => {
                     if (success) {
-                        this.linkedPath$.next(this.linkedPath$.getValue());
+                        this._reloadDirectory();
                     }
                 })
             }
@@ -170,12 +183,14 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     private _createNewFile(path: string): void {
         this._fileSystemService.newFile(path).subscribe(fileStats => {
+            this._reloadDirectory();
             this.fileSystemEvent$.emit(new FileSystemEvent({fileStats, type: 'CREATED'}));
         })
     }
 
     private _createNewFolder(path: string): void {
         this._fileSystemService.newFolder(path).subscribe(fileStats => {
+            this._reloadDirectory();
             this.fileSystemEvent$.emit(new FileSystemEvent({fileStats, type: 'CREATED'}));
         })
     }
@@ -183,7 +198,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     private _moveFile(fileStats: FileStats, newPath: string): void {
         this._fileSystemService.moveFile(fileStats, newPath).subscribe({
             next: (newFileStats) => {
-                this.linkedPath$.next(this.linkedPath$.getValue());
+                this._reloadDirectory();
 
                 this.fileSystemEvent$.emit(new FileSystemEvent({fileStats: newFileStats, type: 'MOVED'}));
             },
@@ -201,11 +216,20 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             });
             this._uploadDialog.afterClosed().subscribe(() => {
                 this._uploadDialog = null;
-                if (uploadEvent.path === this.path$.getValue()) {
-                    this.linkedPath$.next(this.linkedPath$.getValue());
+                if (uploadEvent.path === this.path) {
+                    this._reloadDirectory();
                 }
             });
         }
+    }
+
+    private _sortDirectoryContent(items: FileStats[]): FileStats[] {
+        return items.filter((entry: FileStats) => !entry.name.startsWith('.') || this._showHidden)
+            .sort((a: FileStats, b: FileStats) => a.name.localeCompare(b.name))
+            .sort((a: FileStats, b: FileStats) => {
+                return a.type === 'directory' && b.type === 'file' ? -1 :
+                    a.type === 'file' && b.type === 'directory' ? 1 : 0;
+            })
     }
 
     private async _blobFromBase64(fileContent: FileContent): Promise<Blob> {

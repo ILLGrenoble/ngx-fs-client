@@ -13,10 +13,10 @@ export class ToolBarComponent implements OnInit {
     @Input()
     linkedPath$: BehaviorSubject<LinkedPath>;
 
-    private _basename$: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    private _basename = '';
 
-    get basename$(): BehaviorSubject<string> {
-        return this._basename$;
+    get basename(): string {
+        return this._basename;
     }
 
     ngOnInit() {
@@ -26,7 +26,7 @@ export class ToolBarComponent implements OnInit {
             if (basename === ''){
                 basename = 'Home';
             }
-            this._basename$.next(basename);
+            this._basename = basename;
         });
     }
 
