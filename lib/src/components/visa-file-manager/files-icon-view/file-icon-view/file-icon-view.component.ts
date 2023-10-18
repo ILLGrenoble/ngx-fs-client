@@ -121,12 +121,17 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         }
         event.preventDefault();
         event.stopPropagation();
-        viewChild.openMenu();
+
+        if (this.fileStats.name !== '..') {
+            viewChild.openMenu();
+        }
     }
 
     editFileName(): void {
-        this.renameInProgressChange.emit(this.fileStats);
-        this._isFileNameEdit = true;
+        if (this.fileStats.name !== '..') {
+            this.renameInProgressChange.emit(this.fileStats);
+            this._isFileNameEdit = true;
+        }
     }
 
     setFileNameEditActive(active: boolean) {

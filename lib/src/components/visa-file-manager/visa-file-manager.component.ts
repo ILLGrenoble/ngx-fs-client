@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import {Component, EventEmitter, Inject, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { VisaFileSystemService } from '../../services';
 import {
@@ -7,7 +7,7 @@ import {
     FileStats,
     FileSystemAction,
     FileSystemEvent,
-    LinkedPath
+    LinkedPath, VisaFileSysConfiguration
 } from '../../models';
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
@@ -63,7 +63,8 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         this._reloadDirectory();
     }
 
-    constructor(private _fileSystemService: VisaFileSystemService,
+    constructor(@Inject('config') private _config: VisaFileSysConfiguration,
+                private _fileSystemService: VisaFileSystemService,
                 private _dialog: MatDialog) {
     }
 
@@ -113,6 +114,10 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             })
         ).subscribe({
             next: (content) => {
+                if (this._config.showParentFolder) {
+                    const parentFileStats = this._createParentFileStats();
+                }
+
                 content.content = this._sortDirectoryContent(content.content);
                 this.directoryContent = content;
             },
@@ -120,6 +125,20 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
                 console.error(error);
             }
         });
+    }
+
+    private _createParentFileStats(): FileStats {
+        const pathElements = this._linkedPath.name.split('/');
+        let basename = pathElements.pop();
+        if (basename === ''){
+            return null;
+        }
+
+        return {
+            path: pathElements.join('/'),
+            name: '..',
+            type: 'directory',
+        }
     }
 
     private _downloadFile(fileStats: FileStats): void {
@@ -217,7 +236,15 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     }
 
     private _sortDirectoryContent(items: FileStats[]): FileStats[] {
-        return items.filter((entry: FileStats) => !entry.name.startsWith('.') || this._showHidden)
+        return items.filter((entry: FileStats) => {
+                if (this._config.showParentFolder && entry.name === '..') {
+                    return true;
+                } else if (!this._config.showParentFolder && entry.name === '..') {
+                    return false;
+                } else {
+                    return !entry.name.startsWith('.') || this._showHidden
+                }
+            })
             .sort((a: FileStats, b: FileStats) => a.name.localeCompare(b.name))
             .sort((a: FileStats, b: FileStats) => {
                 return a.type === 'directory' && b.type === 'file' ? -1 :
