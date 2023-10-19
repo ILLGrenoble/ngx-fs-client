@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { BehaviorSubject, filter, Observable, Subject, takeUntil } from 'rxjs';
 import {
+    CopyCutFileAction,
     DirectoryContent,
     FileStats,
     FileSystemAction,
@@ -42,10 +43,24 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     @Input()
     fileSystemEvent$: Observable<FileSystemEvent>;
 
+    get copyCutFileAction(): CopyCutFileAction {
+        return this._copyCutFileAction;
+    }
+
+    @Input()
+    set copyCutFileAction(value: CopyCutFileAction) {
+        this._copyCutFileAction = value
+        this.copyCutFileActionChange.emit(value);
+    }
+
+    @Output()
+    copyCutFileActionChange = new EventEmitter<CopyCutFileAction>();
+
     private _selectedFile: FileStats;
     private _renameInProgress: FileStats;
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _acceptDrop = false;
+    private _copyCutFileAction: CopyCutFileAction;
 
     get items(): FileStats[] {
         return this.directoryContent.content;
@@ -84,6 +99,9 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
                 this._renameInProgress = event.fileStats;
 
             } else if (event.type === 'MOVED') {
+                this._selectedFile = event.fileStats;
+
+            } else if (event.type === 'COPIED') {
                 this._selectedFile = event.fileStats;
             }
         })
@@ -159,4 +177,9 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         this._acceptDrop = false;
     }
 
+    pasteFile(): void {
+        if (this.copyCutFileAction != null) {
+            this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.directoryContent.stats, type: 'PASTE'}));
+        }
+    }
 }

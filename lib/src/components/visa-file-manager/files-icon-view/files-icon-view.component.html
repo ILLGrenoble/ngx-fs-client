@@ -20,6 +20,7 @@
                 [(selectedFile)]="selectedFile"
                 [(renameInProgress)]="renameInProgress"
                 (fileSystemAction)="onFileSystemAction($event)"
+                [(copyCutFileAction)]="copyCutFileAction"
             ></file-icon-view>
         </div>
     </div>
@@ -41,6 +42,10 @@
         <button mat-menu-item (click)="onNewFolder()">
             <mat-icon>create_new_folder</mat-icon>
             <span>New Folder</span>
+        </button>
+        <button mat-menu-item (click)="pasteFile()" [disabled]="copyCutFileAction == null">
+            <mat-icon>content_paste</mat-icon>
+            <span>Paste</span>
         </button>
     </ng-template>
 </mat-menu>

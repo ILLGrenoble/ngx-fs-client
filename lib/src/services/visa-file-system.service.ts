@@ -77,12 +77,12 @@ export class VisaFileSystemService {
         );
     }
 
-    public moveFile(fileStats: FileStats, newPath: string): Observable<FileStats> {
-        const uriEncodedPath = encodeURI(fileStats.path);
+    public moveFile(sourcePath: string, targetPath: string): Observable<FileStats> {
+        const uriEncodedPath = encodeURI(sourcePath);
         const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
 
         const data = {
-            path: newPath
+            path: targetPath
         }
 
         return this._http.patch<FileStats>(apiPath, data);
@@ -99,6 +99,18 @@ export class VisaFileSystemService {
                 return of(false);
             })
         );
+    }
+
+    public copyFile(sourcePath: string, targetPath: string): Observable<FileStats> {
+        const uriEncodedPath = encodeURI(sourcePath);
+        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+
+        const data = {
+            action: 'COPY_TO',
+            path: targetPath,
+        }
+
+        return this._http.put<FileStats>(apiPath, data);
     }
 
     public newFile(path: string): Observable<FileStats> {

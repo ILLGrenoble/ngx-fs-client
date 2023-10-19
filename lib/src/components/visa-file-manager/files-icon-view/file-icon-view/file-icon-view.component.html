@@ -50,5 +50,17 @@
             <mat-icon>delete</mat-icon>
             <span>Delete</span>
         </button>
+        <button mat-menu-item (click)="cutFile()">
+            <mat-icon>content_cut</mat-icon>
+            <span>Cut</span>
+        </button>
+        <button *ngIf="fileStats.type === 'file'" mat-menu-item (click)="copyFile()">
+            <mat-icon>content_copy</mat-icon>
+            <span>Copy</span>
+        </button>
+        <button *ngIf="fileStats.type === 'directory'" mat-menu-item (click)="pasteFile()" [disabled]="copyCutFileAction == null">
+            <mat-icon>content_paste</mat-icon>
+            <span>Paste</span>
+        </button>
     </ng-template>
 </mat-menu>

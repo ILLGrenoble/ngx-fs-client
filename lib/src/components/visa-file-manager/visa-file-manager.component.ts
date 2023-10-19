@@ -2,6 +2,7 @@ import {Component, EventEmitter, Inject, OnDestroy, OnInit, Output, ViewEncapsul
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { VisaFileSystemService } from '../../services';
 import {
+    CopyCutFileAction,
     DirectoryContent,
     FileContent,
     FileStats,
@@ -34,6 +35,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
     private _showHidden = false;
+    private _copyCutFileAction: CopyCutFileAction;
 
     get path(): string {
         let path = this._linkedPath.name;
@@ -61,6 +63,35 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
     set linkedPath(linkedPath: LinkedPath) {
         this._linkedPath = linkedPath;
         this._reloadDirectory();
+    }
+
+    get copyCutFileAction(): CopyCutFileAction {
+        return this._copyCutFileAction;
+    }
+
+    set copyCutFileAction(action: CopyCutFileAction) {
+        if (action === this._copyCutFileAction) {
+            return;
+        }
+        if (action == null) {
+            this._copyCutFileAction = null;
+
+        } else if (action.type == 'PASTE') {
+            if (this._copyCutFileAction.type === 'CUT') {
+                const targetPath = `${action.fileStats.path}/${this._copyCutFileAction.fileStats.name}`
+                this._moveFile(this._copyCutFileAction.fileStats.path, targetPath);
+
+            } else {
+                const fileToCopy = this._copyCutFileAction.fileStats;
+                this._copyFile(fileToCopy.path, fileToCopy.name, action.fileStats.path);
+            }
+
+            this._copyCutFileAction = null;
+
+        } else {
+            console.log(`${action.type} for ${action.fileStats.path}`);
+            this._copyCutFileAction = action;
+        }
     }
 
     constructor(@Inject('config') private _config: VisaFileSysConfiguration,
@@ -95,7 +126,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             this._createNewFolder(action.path)
 
         } else if (action.type === 'MOVE') {
-            this._moveFile(action.fileStats, action.path)
+            this._moveFile(action.fileStats.path, action.path)
 
         } else if (action.type === 'UPLOAD') {
             this._handleUpload(action.files, action.path);
@@ -207,8 +238,8 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         })
     }
 
-    private _moveFile(fileStats: FileStats, newPath: string): void {
-        this._fileSystemService.moveFile(fileStats, newPath).subscribe({
+    private _moveFile(sourcePath: string, targetPath: string): void {
+        this._fileSystemService.moveFile(sourcePath, targetPath).subscribe({
             next: (newFileStats) => {
                 this._reloadDirectory();
 
@@ -216,6 +247,21 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
                 console.log(`Cannot move file: ${error.error}`);
+            }
+        })
+    }
+
+    private _copyFile(sourcePath: string, sourceFileName: string, targetFolder: string): void {
+        this._fileSystemService.copyFile(sourcePath, `${targetFolder}/${sourceFileName}`).subscribe({
+            next: (newFileStats) => {
+                if (this.directoryContent.stats.path === targetFolder) {
+                    this._reloadDirectory();
+                    this.fileSystemEvent$.emit(new FileSystemEvent({fileStats: newFileStats, type: 'COPIED'}));
+                }
+
+            },
+            error: (error) => {
+                console.log(`Cannot copy file: ${error.error}`);
             }
         })
     }

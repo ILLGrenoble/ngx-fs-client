@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import { FileStats, FileSystemAction } from '../../../../models';
+import {CopyCutFileAction, FileStats, FileSystemAction} from '../../../../models';
 import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
@@ -52,6 +52,12 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     @Output()
     fileSystemAction = new EventEmitter<FileSystemAction>();
+
+    @Input()
+    copyCutFileAction: CopyCutFileAction;
+
+    @Output()
+    copyCutFileActionChange = new EventEmitter<CopyCutFileAction>();
 
     private _isSingleClick: Boolean = true;
 
@@ -194,6 +200,22 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
         } else {
             const fileStats = event.data;
             this.fileSystemAction.emit(new FileSystemAction({fileStats, path: `${this.fileStats.path}/${fileStats.name}`, type: 'MOVE'}));
+        }
+    }
+
+    cutFile(): void {
+        this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.fileStats, type: 'CUT'}));
+    }
+
+    copyFile(): void {
+        if (this.fileStats.type === 'file') {
+            this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.fileStats, type: 'COPY'}));
+        }
+    }
+
+    pasteFile(): void {
+        if (this.copyCutFileAction != null && this.fileStats.type === 'directory') {
+            this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.fileStats, type: 'PASTE'}));
         }
     }
 }
