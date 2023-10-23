@@ -18,13 +18,30 @@
 
 .visa-fs-tool-bar-folder-name {
     margin-left: 16px;
-    line-height: 50px;
+    line-height: 48px;
     text-align: start;
-    font-size: 1.3em;
-    font-weight: 400;
-    color: #000;
 }
 
 .visa-fs-tool-bar-action-button {
     margin-left: auto;
+}
+
+.mat-mdc-button {
+    font-size: 1.3em;
+    font-weight: 410;
+    letter-spacing: normal;
+}
+
+.mat-mdc-button[disabled] {
+    font-weight: 410 !important;
+    color: #000 !important;
+}
+
+.mat-mdc-menu-item {
+    min-height: 38px !important;
+}
+
+.mdc-list-item__primary-text {
+    font-size: 14px !important;
+    letter-spacing: normal;
 }

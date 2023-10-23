@@ -10,7 +10,10 @@
         </button>
     </div>
     <div class="visa-fs-tool-bar-folder-name">
-        {{ basename }}
+        <button mat-button [matMenuTriggerFor]="menu" [disabled]="pathMenuItems.length === 0">{{ basename }}</button>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item *ngFor="let item of pathMenuItems" (click)="onPathMenuItemClick(item)">{{item.name}}</button>
+        </mat-menu>
     </div>
     <div class="visa-fs-tool-bar-action-button">
         <button mat-icon-button [matMenuTriggerFor]="actionmenu">

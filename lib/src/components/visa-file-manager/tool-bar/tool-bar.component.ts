@@ -1,6 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { CopyCutFileAction, FileStats, FileSystemAction, LinkedPath } from '../../../models';
 
+export interface PathMenuItem {
+    name: string;
+    path: string;
+}
+
 @Component({
     selector: 'tool-bar',
     templateUrl: './tool-bar.component.html',
@@ -8,6 +13,16 @@ import { CopyCutFileAction, FileStats, FileSystemAction, LinkedPath } from '../.
     encapsulation: ViewEncapsulation.None,
 })
 export class ToolBarComponent {
+
+    private _linkedPath: LinkedPath;
+    private _basename = '';
+    private _pathMenuItems: PathMenuItem[] = [];
+
+    @Input()
+    path: string;
+
+    @Output()
+    pathChange = new EventEmitter<string>;
 
     get linkedPath(): LinkedPath {
         return this._linkedPath;
@@ -17,9 +32,23 @@ export class ToolBarComponent {
     set linkedPath(linkedPath: LinkedPath) {
         this._linkedPath = linkedPath;
         const path = linkedPath.name;
-        let basename = path.split('/').pop();
+
+        let elementName: string;
+        this._pathMenuItems = [];
+
+        let pathElements = path.split('/');
+        let basename = pathElements.pop();
         if (basename === ''){
             basename = 'Home';
+
+        } else {
+            do {
+                const elementPath = pathElements.join('/');
+                pathElements = elementPath.split('/');
+                elementName = pathElements.pop();
+                this._pathMenuItems.push({name: elementName == '' ? 'Home' : elementName, path: elementPath === '' ? '/' : elementPath});
+            } while (elementName !== '');
+
         }
         this._basename = basename;
     }
@@ -48,11 +77,12 @@ export class ToolBarComponent {
     @Output()
     fileSystemAction = new EventEmitter<FileSystemAction>();
 
-    private _linkedPath: LinkedPath;
-    private _basename = '';
-
     get basename(): string {
         return this._basename;
+    }
+
+    get pathMenuItems(): PathMenuItem[] {
+        return this._pathMenuItems;
     }
 
     onBackClick(): void {
@@ -101,6 +131,10 @@ export class ToolBarComponent {
         if (this.copyCutFileAction != null) {
             this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.fileStats, type: 'PASTE'}));
         }
+    }
+
+    onPathMenuItemClick(pathMenuItem: PathMenuItem) {
+        this.pathChange.emit(pathMenuItem.path);
     }
 
 }
