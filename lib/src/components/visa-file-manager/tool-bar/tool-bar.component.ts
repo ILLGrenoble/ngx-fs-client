@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { LinkedPath } from '../../../models/linked-path.model';
+import { CopyCutFileAction, FileStats, FileSystemAction, LinkedPath } from '../../../models';
 
 @Component({
     selector: 'tool-bar',
@@ -28,6 +27,27 @@ export class ToolBarComponent {
     @Output()
     linkedPathChange = new EventEmitter<LinkedPath>();
 
+    @Input()
+    fileStats: FileStats;
+
+    @Input()
+    copyCutFileAction: CopyCutFileAction;
+
+    @Output()
+    copyCutFileActionChange = new EventEmitter<CopyCutFileAction>();
+
+    @Input()
+    selectedFile: FileStats;
+
+    @Input()
+    renameInProgress: FileStats;
+
+    @Output()
+    renameInProgressChange = new EventEmitter<FileStats>();
+
+    @Output()
+    fileSystemAction = new EventEmitter<FileSystemAction>();
+
     private _linkedPath: LinkedPath;
     private _basename = '';
 
@@ -44,6 +64,42 @@ export class ToolBarComponent {
     onForwardClick(): void {
         if (this._linkedPath.next) {
             this.linkedPathChange.emit(this.linkedPath.next);
+        }
+    }
+
+    onNewFile(): void {
+        this.fileSystemAction.emit(new FileSystemAction({path: this.fileStats.path, type: 'NEW_FILE'}));
+    }
+
+    onNewFolder(): void {
+        this.fileSystemAction.emit(new FileSystemAction({path: this.fileStats.path, type: 'NEW_FOLDER'}));
+    }
+
+    downloadFile(): void {
+        this.fileSystemAction.emit(new FileSystemAction({fileStats: this.selectedFile, type: 'DOWNLOAD'}));
+    }
+
+    renameFile(): void {
+        this.renameInProgressChange.emit(this.selectedFile);
+    }
+
+    deleteFile(): void {
+        this.fileSystemAction.emit(new FileSystemAction({fileStats: this.selectedFile, type: 'DELETE'}));
+    }
+
+    cutFile(): void {
+        this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.selectedFile, type: 'CUT'}));
+    }
+
+    copyFile(): void {
+        if (this.selectedFile.type === 'file') {
+            this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.selectedFile, type: 'COPY'}));
+        }
+    }
+
+    pasteFile(): void {
+        if (this.copyCutFileAction != null) {
+            this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.fileStats, type: 'PASTE'}));
         }
     }
 

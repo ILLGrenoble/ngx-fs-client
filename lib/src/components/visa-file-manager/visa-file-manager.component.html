@@ -1,10 +1,19 @@
 <div class="visa-fs-file-manager-container">
-    <tool-bar [(linkedPath)]="linkedPath"></tool-bar>
+    <tool-bar
+        [(linkedPath)]="linkedPath"
+        [fileStats]="directoryContent?.stats"
+        [selectedFile]="selectedFile"
+        [(renameInProgress)]="renameInProgress"
+        (fileSystemAction)="onFileSystemAction($event)"
+        [(copyCutFileAction)]="copyCutFileAction"
+    ></tool-bar>
     <path-bar [path]="path"></path-bar>
     <files-icon-view
         [(path)]="path"
         [directoryContent]="directoryContent"
         [directoryContentLoading]="directoryContentLoading"
+        [(selectedFile)]="selectedFile"
+        [(renameInProgress)]="renameInProgress"
         (fileSystemAction)="onFileSystemAction($event)"
         [fileSystemEvent$]="fileSystemEvent$"
         [(copyCutFileAction)]="copyCutFileAction"

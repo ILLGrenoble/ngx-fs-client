@@ -21,7 +21,6 @@ import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDia
 })
 export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
-
     @Output()
     directoryContent: DirectoryContent = null;
 
@@ -30,6 +29,9 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
     @Output()
     directoryContentLoading = false;
+
+    selectedFile: FileStats = null;
+    renameInProgress: FileStats = null;
 
     private _linkedPath: LinkedPath = new LinkedPath({name: ''});
     private _destroy$: Subject<boolean> = new Subject<boolean>();
@@ -89,7 +91,6 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             this._copyCutFileAction = null;
 
         } else {
-            console.log(`${action.type} for ${action.fileStats.path}`);
             this._copyCutFileAction = action;
         }
     }

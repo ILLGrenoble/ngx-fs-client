@@ -167,7 +167,6 @@ export class FileIconViewComponent implements OnInit, OnDestroy {
 
     cancelFileNameChange(): void {
         this.fileName = this.fileStats.name;
-        console.log('cancel file name change');
         this.renameInProgressChange.emit(null);
     }
 

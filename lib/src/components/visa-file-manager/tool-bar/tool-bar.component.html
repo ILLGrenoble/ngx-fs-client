@@ -12,4 +12,46 @@
     <div class="visa-fs-tool-bar-folder-name">
         {{ basename }}
     </div>
+    <div class="visa-fs-tool-bar-action-button">
+        <button mat-icon-button [matMenuTriggerFor]="actionmenu">
+            <mat-icon>more_horiz</mat-icon>
+        </button>
+    </div>
 </div>
+
+
+<mat-menu #actionmenu="matMenu">
+    <button mat-menu-item (click)="onNewFile()">
+        <mat-icon>insert_drive_file</mat-icon>
+        <span>New File</span>
+    </button>
+    <button mat-menu-item (click)="onNewFolder()">
+        <mat-icon>create_new_folder</mat-icon>
+        <span>New Folder</span>
+    </button>
+
+    <button mat-menu-item (click)="downloadFile()" [disabled]="selectedFile == null || selectedFile?.type !== 'file'">
+        <mat-icon>cloud_download</mat-icon>
+        <span>Download</span>
+    </button>
+    <button mat-menu-item (click)="renameFile()" [disabled]="selectedFile == null">
+        <mat-icon>edit</mat-icon>
+        <span>Rename</span>
+    </button>
+    <button mat-menu-item (click)="deleteFile()" [disabled]="selectedFile == null">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+    </button>
+    <button mat-menu-item (click)="cutFile()" [disabled]="selectedFile == null">
+        <mat-icon>content_cut</mat-icon>
+        <span>Cut</span>
+    </button>
+    <button mat-menu-item (click)="copyFile()" [disabled]="selectedFile == null || selectedFile?.type !== 'file'">
+        <mat-icon>content_copy</mat-icon>
+        <span>Copy</span>
+    </button>
+    <button mat-menu-item (click)="pasteFile()" [disabled]="copyCutFileAction == null">
+        <mat-icon>content_paste</mat-icon>
+        <span>Paste</span>
+    </button>
+</mat-menu>

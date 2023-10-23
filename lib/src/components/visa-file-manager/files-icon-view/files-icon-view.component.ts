@@ -43,6 +43,21 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     @Input()
     fileSystemEvent$: Observable<FileSystemEvent>;
 
+    get selectedFile(): FileStats {
+        return this._selectedFile;
+    }
+
+    @Input()
+    set selectedFile(fileStats: FileStats) {
+        if (this._selectedFile != fileStats) {
+            this._selectedFile = fileStats;
+            this.selectedFileChange.emit(fileStats);
+        }
+    }
+
+    @Output()
+    selectedFileChange = new EventEmitter<FileStats>();
+
     get copyCutFileAction(): CopyCutFileAction {
         return this._copyCutFileAction;
     }
@@ -55,6 +70,22 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
 
     @Output()
     copyCutFileActionChange = new EventEmitter<CopyCutFileAction>();
+
+
+    get renameInProgress(): FileStats {
+        return this._renameInProgress;
+    }
+
+    @Input()
+    set renameInProgress(fileStats: FileStats) {
+        if (this._renameInProgress != fileStats) {
+            this._renameInProgress = fileStats;
+            this.renameInProgressChange.emit(fileStats);
+        }
+    }
+
+    @Output()
+    renameInProgressChange = new EventEmitter<FileStats>();
 
     private _selectedFile: FileStats;
     private _renameInProgress: FileStats;
@@ -70,22 +101,6 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         return this._acceptDrop;
     }
 
-    get selectedFile(): FileStats {
-        return this._selectedFile;
-    }
-
-    set selectedFile(value: FileStats) {
-        this._selectedFile = value;
-    }
-
-    get renameInProgress(): FileStats {
-        return this._renameInProgress;
-    }
-
-    set renameInProgress(value: FileStats) {
-        this._renameInProgress = value;
-    }
-
     constructor(private _dialog: MatDialog) {
     }
 
@@ -95,14 +110,14 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
             filter(data => data != null)
         ).subscribe(event => {
             if (event.type === 'CREATED') {
-                this._selectedFile = event.fileStats;
+                this.selectedFile = event.fileStats;
                 this._renameInProgress = event.fileStats;
 
             } else if (event.type === 'MOVED') {
-                this._selectedFile = event.fileStats;
+                this.selectedFile = event.fileStats;
 
             } else if (event.type === 'COPIED') {
-                this._selectedFile = event.fileStats;
+                this.selectedFile = event.fileStats;
             }
         })
     }
@@ -154,7 +169,7 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
     }
 
     onClick(): void {
-        this._selectedFile = null;
+        this.selectedFile = null;
         this._renameInProgress = null;
     }
 
