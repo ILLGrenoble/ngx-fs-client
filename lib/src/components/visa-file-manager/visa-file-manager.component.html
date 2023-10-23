@@ -8,7 +8,9 @@
         (fileSystemAction)="onFileSystemAction($event)"
         [(copyCutFileAction)]="copyCutFileAction"
     ></tool-bar>
-    <path-bar [path]="path"></path-bar>
+    <path-bar
+        [(path)]="path"
+    ></path-bar>
     <files-icon-view
         [(path)]="path"
         [directoryContent]="directoryContent"

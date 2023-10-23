@@ -155,6 +155,10 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
                 console.error(error);
+                if (this._linkedPath.previous) {
+                    this._linkedPath.previous.next = null;
+                    this.linkedPath = this._linkedPath.previous;
+                }
             }
         });
     }

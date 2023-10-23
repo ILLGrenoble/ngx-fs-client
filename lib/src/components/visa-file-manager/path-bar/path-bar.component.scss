@@ -1,13 +1,43 @@
 .visa-fs-path-bar-container {
     width: 100%;
-    height: 30px;
+    height: 38px;
     background-color: #fdfdfd;
     border-bottom: 1px solid #ccc;
+}
+
+
+.visa-fs-path-bar-text-wrapper {
+    margin-left: 16px;
+    margin-right: 16px;
 }
 
 .visa-fs-path-bar-text {
     line-height: 30px;
     text-align: start;
     font-size: 1.0em;
-    margin-left: 16px;
+    font-weight: 500;
+
+    max-width: 100%;
+    padding: 2px 2px 2px 2px;
+    border: 2px solid transparent;
+}
+
+
+.visa-fs-path-bar-text-edit {
+    line-height: 26px;
+    font-size: 1.0em;
+    font-weight: 500;
+    max-width: 100%;
+    width: 100%;
+    text-align: start;
+    border-radius: 4px;
+    margin-top: 3px;
+
+    color: #5e5e5e;
+    border: 2px solid #4ca4dd;
+    background-color: #edebeb;
+
+    &::selection {
+        background-color: #a0bbff;
+    }
 }
