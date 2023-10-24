@@ -17,6 +17,7 @@ import { DndDropEvent } from 'ngx-drag-drop';
     templateUrl: './files-icon-view.component.html',
     styleUrls: ['./files-icon-view.component.scss'],
     encapsulation: ViewEncapsulation.None,
+    host: { class: 'visa-fs-files-icon-view-component'},
 })
 export class FilesIconViewComponent implements OnInit, OnDestroy {
 

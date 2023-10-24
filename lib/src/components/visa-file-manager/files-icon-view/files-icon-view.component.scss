@@ -1,16 +1,21 @@
 
+.visa-fs-files-icon-view-component {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
 .visa-fs-files-icon-view-container {
-    background-color: #fff;
-    height: 390px;
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .visa-fs-files-icon-view-loading {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    flex-grow: 1;
 }
 
 .visa-fs-files-icon-view-contents {
@@ -21,8 +26,6 @@
     justify-content: flex-start;
     align-items: flex-start;
     align-content: flex-start;
-    max-height: 390px;
-    height: 100%;
     overflow-y: auto;
     border: 3px solid transparent;
     border-radius: 6px;

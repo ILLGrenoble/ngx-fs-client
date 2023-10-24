@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Inject, OnDestroy, OnInit, Output, ViewEncapsulation} from '@angular/core';
+import {Component, EventEmitter, Inject, OnDestroy, OnInit, Input, Output, ViewEncapsulation, ViewChild, ElementRef} from '@angular/core';
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { VisaFileSystemService } from '../../services';
 import {
@@ -141,9 +141,6 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
         this._fileSystemService.getDirectoryContent(path).pipe(
             takeUntil(this._destroy$),
-            finalize(() => {
-                this.directoryContentLoading = false;
-            })
         ).subscribe({
             next: (content) => {
                 if (this._config.showParentFolder) {
@@ -152,6 +149,7 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
 
                 content.content = this._sortDirectoryContent(content.content);
                 this.directoryContent = content;
+                this.directoryContentLoading = false;
             },
             error: (error) => {
                 console.error(error);
