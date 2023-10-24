@@ -1,27 +1,105 @@
-# VISA FS Client
+# ngx-fs-client
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.0.3.
+`ngx-fs-client` is an angular component for connecting to a remote _Node FS Server_. It provides access to a remote filesystem and perform standard file system operations similar to a stand file manager.
 
-## Development server
+The `Node FS Server` runs as a user process on a remote server and provides a simple REST API to access the user's file system (system files are inaccessible). This component can be integrated into an angular app to provide remote access to the user's file system. Due to security concerns the client is not intended to access the server directly but rather use a server-side proxy to manage access/authorisation rights (eg running the FS Server within a micro-service architecture).
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+As a simple security measure (inefficient for direct public access), the remote server can be configured to only accept requests with a valid `x-auth-token` header. This header should be added in the server proxy (therefore remaining hidden from public network inspection), but for testing purposes the client component can be configured to pass the header too.
 
-## Code scaffolding
+It has been built using Angular 16.0.0+ and uses Angular Material for the component library. `ngx-drag-drop` is also required to enable the drag and drop functionality.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Features
 
-## Build
+- Browse and navigate folder contents
+- File upload and download
+- Drag and Drop files and folders (including external files)
+- Cut/Copy/Delete actions
+- Create new files and folders
+- Rename files and folders
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+# Installation
 
-## Running unit tests
+To use ngx-fs-client in your project, install it via npm:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```
+npm i @illgrenoble/ngx-remote-desktop --save
+```
 
-## Running end-to-end tests
+You also need to install the drag-and-drop peer dependency:
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+npm i ngx-drag-drop --save
 
-## Further help
+# Usage
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Integration into a module:
+
+`app.module.ts`
+
+```
+import { VisaFileSysModule } from '@illgrenoble/visa-fs-client';
+// etc.
+
+@NgModule({
+    imports: [
+        // etc.
+        VisaFileSysModule.forRoot({
+            basePath: 'files',
+            showParentFolder: true,
+            accessToken: '1a5bfc34dab9c45bd3a',
+        }),
+    ],
+    declarations: [
+        AppComponent,
+        // etc.
+    ],
+    bootstrap: [
+        AppComponent
+    ]
+})
+export class AppModule {
+}
+
+```
+
+See below for details on the configuration.
+
+Integration into a component template:
+
+`app.component.html`
+```
+<div>
+    <visa-file-manager></visa-file-manager>
+</div>
+```
+
+## Configuration
+
+The configuration for the `VisaFileSysModule` has the following entries:
+
+### `basePath: string`
+Requests to the `Node FS Server` are made to the same host as the angular app: a proxy is required to forward the requests to the server. In development mode this can be using the webpack proxy config, eg
+
+```
+{
+    "/files/*": {
+        "target": "http://localhost:8090",
+        "secure": false,
+        "logLevel": "debug",
+        "pathRewrite": {
+            "^/visafs/": "/"
+        },
+        "changeOrigin": true
+    }
+}
+
+```
+
+### `showParentFolder: boolean` (optional, default = false)
+With this parameter active the parent folder is alays visible in the current folder contents (show as `.. `). This allows for an alternative navigation methods to parent directories and enables dragging and dropping files/folders to the parent folder.
+
+### `accessToken: string` (optional)
+If the server is configured with an accessToken, it can be specified here. 
+
+> For security reasons this isn't recommended in production, the accessToken shouldn't be available/visible in the client. Always handle access to the server in the backend along with authentication of the connected user.
+
+

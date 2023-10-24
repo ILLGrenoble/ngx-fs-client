@@ -1,4 +1,4 @@
-import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import {Inject, Injectable} from '@angular/core';
 import {catchError, concatMap, EMPTY, map, Observable, of, throwError} from 'rxjs';
 import {
@@ -13,10 +13,54 @@ import {
 @Injectable({
     providedIn: 'root'
 })
-export class VisaFileSystemService {
+class VisaFileSystemHttpClient {
+
+    private readonly _headers: HttpHeaders;
 
     constructor(@Inject('config') private _config: VisaFileSysConfiguration,
                 private _http: HttpClient) {
+        if (this._config.accessToken) {
+            this._headers = new HttpHeaders().set('x-auth-token', this._config.accessToken);
+        }
+    }
+
+    get<T>(path: string): Observable<T> {
+        return this._http.get<T>(path, {headers: this._headers});
+    }
+
+    post<T>(path: string, body: any): Observable<T> {
+        return this._http.post<T>(path, body, {headers: this._headers});
+    }
+
+    put<T>(path: string, body: any): Observable<T> {
+        return this._http.put<T>(path, body, {headers: this._headers});
+    }
+
+    patch<T>(path: string, body: any): Observable<T> {
+        return this._http.patch<T>(path, body, {headers: this._headers});
+    }
+
+    delete<T>(path: string): Observable<T> {
+        return this._http.delete<T>(path, {headers: this._headers});
+    }
+
+    request<T>(req: HttpRequest<any>): Observable<HttpEvent<T>> {
+        const request = new HttpRequest(req.method, req.url, req.body, {
+            reportProgress: req.reportProgress,
+            headers: this._headers
+        })
+
+        return this._http.request<T>(request);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class VisaFileSystemService {
+
+    constructor(@Inject('config') private _config: VisaFileSysConfiguration,
+                private _http: VisaFileSystemHttpClient) {
     }
 
     public getDirectoryContent(path: string): Observable<DirectoryContent> {
