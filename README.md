@@ -47,11 +47,7 @@ import { NgxFileSysModule } from '@illgrenoble/ngx-fs-client';
 @NgModule({
     imports: [
         // etc.
-        NgxFileSysModule.forRoot({
-            basePath: 'files',
-            showParentFolder: true,
-            accessToken: '1a5bfc34dab9c45bd3a',
-        }),
+        NgxFileSysModule,
     ],
     declarations: [
         AppComponent,
@@ -65,46 +61,55 @@ export class AppModule {
 }
 
 ```
-
-See below for details on the configuration.
-
 Integration into a component template:
 
 `app.component.html`
 ```
 <div>
-    <ngx-file-manager></ngx-file-manager>
+    <ngx-file-manager [context]="context" [showParentFolder]="true"></ngx-file-manager>
 </div>
 ```
 
 ## Configuration
 
-The configuration for the `NgxFileSysModule` has the following entries:
+The `context` (an `NgxFileSysContxt`) passed to the `ngx-file-manager` component provides server details necessary for the component to connect to the `Node FS API`. Multiple servers can be configured for different components in an application. 
 
-### `basePath: string`
-Requests to the `Node FS Server` are made to the same host as the angular app: a proxy is required to forward the requests to the server. In development mode this can be using the webpack proxy config, eg
-
+An example context is:
 ```
-{
-    "/files/*": {
-        "target": "http://localhost:8090",
-        "secure": false,
-        "logLevel": "debug",
-        "pathRewrite": {
-            "^/files/": "/"
-        },
-        "changeOrigin": true
+const context = new NgxFileSysContext({
+    basePath: 'files,
+    accessToken: '1a5bfc34dab9c45bd3a',
+});
+```
+
+The following fields can be configured in the context:
+
+ - `basePath: string`
+
+    Requests to the `Node FS Server` are made to the same host as the angular app: a proxy is required to forward the requests to the server. In development mode this can be using the webpack proxy config, for example with the basePath of ``files'` we can specify a proxy conf such as:
+    
+    ```
+    {
+        "/files/*": {
+            "target": "http://localhost:8090",
+            "secure": false,
+            "logLevel": "debug",
+            "pathRewrite": {
+                "^/files/": "/"
+            },
+            "changeOrigin": true
+        }
     }
-}
+    
+    ```
 
-```
+ - `accessToken: string` (optional)
 
-### `showParentFolder: boolean` (optional, default = false)
-With this parameter active the parent folder is alays visible in the current folder contents (show as `.. `). This allows for an alternative navigation methods to parent directories and enables dragging and dropping files/folders to the parent folder.
+    If the server is configured with an accessToken, it can be specified here.
 
-### `accessToken: string` (optional)
-If the server is configured with an accessToken, it can be specified here. 
+    > For security reasons this isn't recommended in production, the accessToken shouldn't be available/visible in the client. Always handle access to the server in the backend via a proxy along with authentication of the connected user.
 
-> For security reasons this isn't recommended in production, the accessToken shouldn't be available/visible in the client. Always handle access to the server in the backend along with authentication of the connected user.
+
+The `showParentFolder` (optional, default = false) attribute of the `ngx-file-manager` allows the parent folder to be always visible in the current folder contents (show as `.. `). This allows for an alternative navigation methods to parent directories and enables dragging and dropping files/folders to the parent folder.
 
 

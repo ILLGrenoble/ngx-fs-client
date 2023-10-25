@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {CopyCutFileAction, FileStats, FileSystemAction} from '../../../../models';
-import {BehaviorSubject, Subject, takeUntil} from 'rxjs';
+import {CopyCutFileAction, FileStats, FileSystemAction} from '../../../models';
+import {Subject} from 'rxjs';
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';

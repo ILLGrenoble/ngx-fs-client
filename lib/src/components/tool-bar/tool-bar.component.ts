@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { CopyCutFileAction, FileStats, FileSystemAction, LinkedPath } from '../../../models';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
+import { CopyCutFileAction, FileStats, FileSystemAction, LinkedPath } from '../../models';
 
 export interface PathMenuItem {
     name: string;

@@ -1,5 +1,5 @@
 import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
-import {Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {catchError, concatMap, EMPTY, map, Observable, of, throwError} from 'rxjs';
 import {
     DirectoryContent, DownloadProgress,
@@ -8,19 +8,15 @@ import {
     UploadData,
     UploadProgress,
 } from '../models';
-import { NgxFileSysConfiguration } from '../ngx-file-sys.configuration';
+import { NgxFileSysContext } from '../ngx-file-sys.context';
 
-@Injectable({
-    providedIn: 'root'
-})
 class NgxFileSystemHttpClient {
 
     private readonly _headers: HttpHeaders;
 
-    constructor(@Inject('config') private _config: NgxFileSysConfiguration,
-                private _http: HttpClient) {
-        if (this._config.accessToken) {
-            this._headers = new HttpHeaders().set('x-auth-token', this._config.accessToken);
+    constructor(private _context: NgxFileSysContext, private _http: HttpClient) {
+        if (this._context?.accessToken) {
+            this._headers = new HttpHeaders().set('x-auth-token', this._context.accessToken);
         }
     }
 
@@ -57,15 +53,27 @@ class NgxFileSystemHttpClient {
 @Injectable({
     providedIn: 'root'
 })
+export class NgxFileSystemServiceFactory {
+
+    constructor(private _http: HttpClient) {
+    }
+
+    create(context: NgxFileSysContext): NgxFileSystemService {
+        return new NgxFileSystemService(context, this._http);
+    }
+}
+
 export class NgxFileSystemService {
 
-    constructor(@Inject('config') private _config: NgxFileSysConfiguration,
-                private _http: NgxFileSystemHttpClient) {
+    private _http: NgxFileSystemHttpClient;
+
+    constructor(private _context: NgxFileSysContext, http: HttpClient) {
+        this._http = new NgxFileSystemHttpClient(this._context, http);
     }
 
     public getDirectoryContent(path: string): Observable<DirectoryContent> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files/${uriEncodedPath}`;
         return this._http.get<FileContent | DirectoryContent>(apiPath).pipe(
             concatMap(data => {
                 if (data.stats.type === 'file') {
@@ -79,7 +87,7 @@ export class NgxFileSystemService {
 
     public downloadFile(path: string): Observable<FileContent> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files/${uriEncodedPath}`;
         return this._http.get<FileContent | DirectoryContent>(apiPath).pipe(
             concatMap(data => {
                 if (data.stats.type !== 'file') {
@@ -93,7 +101,7 @@ export class NgxFileSystemService {
 
     public downloadFileWithProgress(path: string): Observable<DownloadProgress> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files/${uriEncodedPath}`;
 
         const req = new HttpRequest('GET', apiPath, null, {
             reportProgress: true
@@ -123,7 +131,7 @@ export class NgxFileSystemService {
 
     public moveFile(sourcePath: string, targetPath: string): Observable<FileStats> {
         const uriEncodedPath = encodeURI(sourcePath);
-        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files${uriEncodedPath}`;
 
         const data = {
             path: targetPath
@@ -134,7 +142,7 @@ export class NgxFileSystemService {
 
     public deleteFileOrFolder(fileStats: FileStats): Observable<boolean> {
         const uriEncodedPath = encodeURI(fileStats.path);
-        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files${uriEncodedPath}`;
 
         return this._http.delete(apiPath).pipe(
             map(() => true),
@@ -147,7 +155,7 @@ export class NgxFileSystemService {
 
     public copyFile(sourcePath: string, targetPath: string): Observable<FileStats> {
         const uriEncodedPath = encodeURI(sourcePath);
-        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files${uriEncodedPath}`;
 
         const data = {
             action: 'COPY_TO',
@@ -159,7 +167,7 @@ export class NgxFileSystemService {
 
     public newFile(path: string): Observable<FileStats> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files${uriEncodedPath}`;
 
         const data = {
             action: 'NEW_FILE'
@@ -170,7 +178,7 @@ export class NgxFileSystemService {
 
     public newFolder(path: string): Observable<FileStats> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files${uriEncodedPath}`;
 
         const data = {
             action: 'NEW_FOLDER'
@@ -181,14 +189,14 @@ export class NgxFileSystemService {
 
     public uploadFile(path: string, data: UploadData): Observable<FileStats> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files${uriEncodedPath}`;
 
         return this._http.post<FileStats>(apiPath, data);
     }
 
     public uploadFileWithProgress(path: string, data: UploadData): Observable<UploadProgress> {
         const uriEncodedPath = encodeURI(path);
-        const apiPath = `${this._config.basePath}/api/files/${uriEncodedPath}`;
+        const apiPath = `${this._context.basePath}/api/files/${uriEncodedPath}`;
 
         const req = new HttpRequest('POST', apiPath, data, {
             reportProgress: true

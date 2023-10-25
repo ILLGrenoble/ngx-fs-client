@@ -3,12 +3,10 @@ import {
     ElementRef,
     EventEmitter,
     Input,
-    OnInit,
     Output,
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
     selector: 'path-bar',

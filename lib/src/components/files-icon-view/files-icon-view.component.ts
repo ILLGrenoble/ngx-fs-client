@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject, filter, Observable, Subject, takeUntil } from 'rxjs';
+import { filter, Observable, Subject, takeUntil } from 'rxjs';
 import {
     CopyCutFileAction,
     DirectoryContent,
     FileStats,
     FileSystemAction,
     FileSystemEvent,
-} from '../../../models';
+} from '../../models';
 import {MatDialog} from "@angular/material/dialog";
 import {DownloadFileDialogComponent} from "./dialogs";
 import {MatMenuTrigger} from "@angular/material/menu";

@@ -1,3 +1,6 @@
 export * from './ngx-file-sys.module'
-export * from './ngx-file-sys.configuration'
+export * from './ngx-file-sys.context'
 export * from './components'
+export * from './services'
+export * from './pipes'
+export * from './models'

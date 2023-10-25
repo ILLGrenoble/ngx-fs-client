@@ -1,7 +1,7 @@
 {
     "name": "@illgrenoble/ngx-fs-client",
     "description": "Ngx-fs-client is an angular component providing access to a remote filesystem via the Node FS Server, performing standard file system operations similar to a standard file manager.",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/ILLGrenoble/ngx-fs-client.git"

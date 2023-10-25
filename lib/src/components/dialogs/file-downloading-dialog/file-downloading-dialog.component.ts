@@ -1,6 +1,6 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {FileStats} from "../../../../models";
+import {FileStats} from "../../../models";
 import {BehaviorSubject, filter, Subject, takeUntil} from "rxjs";
 
 @Component({

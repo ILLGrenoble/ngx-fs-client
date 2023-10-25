@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Inject, OnDestroy, OnInit, Input, Output, ViewEncapsulation, ViewChild, ElementRef} from '@angular/core';
-import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
-import { NgxFileSystemService } from '../../services';
+import {Component, EventEmitter, OnDestroy, OnInit, Input, Output, ViewEncapsulation} from '@angular/core';
+import {BehaviorSubject, concatMap, filter, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
+import { NgxFileSystemService, NgxFileSystemServiceFactory } from '../services';
 import {
     CopyCutFileAction,
     DirectoryContent,
@@ -9,10 +9,10 @@ import {
     FileSystemAction,
     FileSystemEvent,
     LinkedPath
-} from '../../models';
+} from '../models';
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
-import { NgxFileSysConfiguration } from '../../ngx-file-sys.configuration';
+import { NgxFileSysContext } from '../ngx-file-sys.context';
 
 @Component({
     selector: 'ngx-file-manager',
@@ -21,6 +21,12 @@ import { NgxFileSysConfiguration } from '../../ngx-file-sys.configuration';
     encapsulation: ViewEncapsulation.None,
 })
 export class NgxFileManagerComponent implements OnInit, OnDestroy {
+
+    @Input()
+    context: NgxFileSysContext;
+
+    @Input()
+    showParentFolder: boolean = false;
 
     @Output()
     directoryContent: DirectoryContent = null;
@@ -34,6 +40,7 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
     selectedFile: FileStats = null;
     renameInProgress: FileStats = null;
 
+    private _fileSystemService: NgxFileSystemService;
     private _linkedPath: LinkedPath = new LinkedPath({name: ''});
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
@@ -96,12 +103,15 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(@Inject('config') private _config: NgxFileSysConfiguration,
-                private _fileSystemService: NgxFileSystemService,
+    constructor(private _fileSystemServiceFactory: NgxFileSystemServiceFactory,
                 private _dialog: MatDialog) {
     }
 
     ngOnInit(): void {
+        if (this.context == null) {
+            this.context = new NgxFileSysContext({});
+        }
+        this._fileSystemService = this._fileSystemServiceFactory.create(this.context);
         this._reloadDirectory();
     }
 
@@ -144,8 +154,8 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
             takeUntil(this._destroy$),
         ).subscribe({
             next: (content) => {
-                if (this._config.showParentFolder) {
-                    const parentFileStats = this._createParentFileStats();
+                if (this.showParentFolder) {
+                    this._createParentFileStats();
                 }
 
                 content.content = this._sortDirectoryContent(content.content);
@@ -287,9 +297,9 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
 
     private _sortDirectoryContent(items: FileStats[]): FileStats[] {
         return items.filter((entry: FileStats) => {
-                if (this._config.showParentFolder && entry.name === '..') {
+                if (this.showParentFolder && entry.name === '..') {
                     return true;
-                } else if (!this._config.showParentFolder && entry.name === '..') {
+                } else if (!this.showParentFolder && entry.name === '..') {
                     return false;
                 } else {
                     return !entry.name.startsWith('.') || this._showHidden

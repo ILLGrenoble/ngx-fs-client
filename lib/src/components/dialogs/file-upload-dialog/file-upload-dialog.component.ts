@@ -1,6 +1,6 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {FileUpload, UploadData} from "../../../../models";
+import {FileUpload, UploadData} from "../../../models";
 import {
     catchError,
     concatMap,
@@ -11,7 +11,7 @@ import {
     Subject,
     takeUntil,
 } from 'rxjs';
-import {NgxFileSystemService} from "../../../../services";
+import {NgxFileSystemService} from "../../../services";
 
 @Component({
     selector: 'file-upload-dialog',
