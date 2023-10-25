@@ -20,7 +20,6 @@
         "LICENSE",
         "README.md"
     ],
-    "private": true,
     "dependencies": {
         "@angular/animations": "^16.0.0",
         "@angular/cdk": "~16.2.6",
