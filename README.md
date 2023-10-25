@@ -1,4 +1,5 @@
 # ngx-fs-client
+[![npm version](https://badge.fury.io/js/%40illgrenoble%2Fngx-fs-client.svg)](https://badge.fury.io/js/%40illgrenoble%2Fngx-fs-client)
 
 `ngx-fs-client` is an angular component for connecting to a remote _Node FS Server_. It provides access to a remote filesystem and perform standard file system operations similar to a standard file manager.
 
@@ -7,6 +8,8 @@ The `Node FS Server` runs as a user process on a remote server and provides a si
 As a simple security measure (inefficient for direct public access), the remote server can be configured to only accept requests with a valid `x-auth-token` header. This header should be added in the server proxy (therefore remaining hidden from public network inspection), but for testing purposes the client component can be configured to pass the header too.
 
 It has been built using Angular 16.0.0+ and uses Angular Material for the component library. `ngx-drag-drop` is also required to enable the drag and drop functionality.
+
+![Screenshot](https://raw.githubusercontent.com/ILLGrenoble/ngx-fs-client/master/screenshot.png)
 
 ## Features
 
