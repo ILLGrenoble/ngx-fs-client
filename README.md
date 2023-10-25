@@ -27,7 +27,9 @@ npm i @illgrenoble/ngx-remote-desktop --save
 
 You also need to install the drag-and-drop peer dependency:
 
+```
 npm i ngx-drag-drop --save
+```
 
 # Usage
 
