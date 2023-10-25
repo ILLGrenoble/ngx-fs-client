@@ -1,4 +1,4 @@
-.visa-fs-tool-bar-container {
+.ngx-fs-tool-bar-container {
     width: 100%;
     height: 50px;
     background-color: #f4f4f4;
@@ -9,20 +9,20 @@
     align-content: center;
 }
 
-.visa-fs-tool-bar-path-navigation-button {
+.ngx-fs-tool-bar-path-navigation-button {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
 }
 
-.visa-fs-tool-bar-folder-name {
+.ngx-fs-tool-bar-folder-name {
     margin-left: 16px;
     line-height: 48px;
     text-align: start;
 }
 
-.visa-fs-tool-bar-action-button {
+.ngx-fs-tool-bar-action-button {
     margin-left: auto;
 }
 

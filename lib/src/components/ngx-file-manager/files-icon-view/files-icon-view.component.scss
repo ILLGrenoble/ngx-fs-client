@@ -1,24 +1,24 @@
 
-.visa-fs-files-icon-view-component {
+.ngx-fs-files-icon-view-component {
     display: flex;
     flex-grow: 1;
     overflow: hidden;
 }
 
-.visa-fs-files-icon-view-container {
+.ngx-fs-files-icon-view-container {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
-.visa-fs-files-icon-view-loading {
+.ngx-fs-files-icon-view-loading {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-grow: 1;
 }
 
-.visa-fs-files-icon-view-contents {
+.ngx-fs-files-icon-view-contents {
     flex-grow: 1;
     display: flex;
     flex-direction: row;

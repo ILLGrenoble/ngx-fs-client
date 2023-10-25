@@ -1,8 +1,8 @@
-<div class="visa-fs-file-icon-view-container">
+<div class="ngx-fs-file-icon-view-container">
     <span [matMenuTriggerFor]="rootMenu" [matMenuTriggerData]="{fileStats: fileStats}" #menuTrigger="matMenuTrigger"></span>
 
-    <div class="visa-fs-file-icon-view-inner"
-         [ngClass]="{'visa-fs-file-icon-view-inner__selected': selected}"
+    <div class="ngx-fs-file-icon-view-inner"
+         [ngClass]="{'ngx-fs-file-icon-view-inner__selected': selected}"
          (dblclick)="onDoubleClicked()"
          (click)="onSelect($event)"
          (contextmenu)="openMenu($event, menuTrigger)"
@@ -14,21 +14,21 @@
          (dndStart)="onDragStart()"
          [dndDisableDropIf]="fileStats.type === 'file'"
          dndDropzone
-         dndDragoverClass="visa-fs-file-icon-view-inner__drag-over"
+         dndDragoverClass="ngx-fs-file-icon-view-inner__drag-over"
          [dndAllowExternal]="true"
     >
-        <div class="visa-fs-file-icon-view-icon">
-            <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
-            <mat-icon color="primary" class="visa-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
+        <div class="ngx-fs-file-icon-view-icon">
+            <mat-icon color="primary" class="ngx-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
+            <mat-icon color="primary" class="ngx-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
         </div>
 
-        <input type="text" #fileNameInput class="visa-fs-file-icon-view-name-edit" [ngClass]="{'visa-fs-hidden': !isFileNameEdit}"
+        <input type="text" #fileNameInput class="ngx-fs-file-icon-view-name-edit" [ngClass]="{'ngx-fs-hidden': !isFileNameEdit}"
                [(ngModel)]="fileName"
                (keydown.enter)="updateFileName()"
                (keydown.escape)="cancelFileNameChange()">
 <!--               (blur)="cancelFileNameChange()">-->
 
-        <div class="visa-fs-file-icon-view-name" [ngClass]="{'visa-fs-hidden': isFileNameEdit, 'visa-fs-file-icon-view-name__selected': selected}">
+        <div class="ngx-fs-file-icon-view-name" [ngClass]="{'ngx-fs-hidden': isFileNameEdit, 'ngx-fs-file-icon-view-name__selected': selected}">
 
             {{ fileStats.name | fileNameReducer:32 }}
         </div>

@@ -1,13 +1,13 @@
-<div class="visa-fs-path-bar-container">
-    <div class="visa-fs-path-bar-text-wrapper" (click)="onClicked()">
+<div class="ngx-fs-path-bar-container">
+    <div class="ngx-fs-path-bar-text-wrapper" (click)="onClicked()">
 
-        <input type="text" #pathInput class="visa-fs-path-bar-text-edit" [ngClass]="{'visa-fs-hidden': !isPathEdit}"
+        <input type="text" #pathInput class="ngx-fs-path-bar-text-edit" [ngClass]="{'ngx-fs-hidden': !isPathEdit}"
                [(ngModel)]="editPath"
                (keydown.enter)="updatePath()"
                (keydown.escape)="cancelPathChange()"
                (blur)="cancelPathChange()">
 
-        <div class="visa-fs-path-bar-text" [ngClass]="{'visa-fs-hidden': isPathEdit}">
+        <div class="ngx-fs-path-bar-text" [ngClass]="{'ngx-fs-hidden': isPathEdit}">
 
             {{ path }}
         </div>

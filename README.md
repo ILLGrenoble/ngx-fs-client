@@ -36,13 +36,13 @@ Integration into a module:
 `app.module.ts`
 
 ```
-import { VisaFileSysModule } from '@illgrenoble/visa-fs-client';
+import { NgxFileSysModule } from '@illgrenoble/ngx-fs-client';
 // etc.
 
 @NgModule({
     imports: [
         // etc.
-        VisaFileSysModule.forRoot({
+        NgxFileSysModule.forRoot({
             basePath: 'files',
             showParentFolder: true,
             accessToken: '1a5bfc34dab9c45bd3a',
@@ -68,13 +68,13 @@ Integration into a component template:
 `app.component.html`
 ```
 <div>
-    <visa-file-manager></visa-file-manager>
+    <ngx-file-manager></ngx-file-manager>
 </div>
 ```
 
 ## Configuration
 
-The configuration for the `VisaFileSysModule` has the following entries:
+The configuration for the `NgxFileSysModule` has the following entries:
 
 ### `basePath: string`
 Requests to the `Node FS Server` are made to the same host as the angular app: a proxy is required to forward the requests to the server. In development mode this can be using the webpack proxy config, eg

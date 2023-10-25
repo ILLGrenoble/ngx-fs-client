@@ -7,7 +7,7 @@
     <div *ngIf="progress == 100 && error == null">
         Downloaded <b>{{fileStats.name}}</b>
     </div>
-    <div class="visa-fs-file-manager-error" *ngIf="progress == 100 && error != null">
+    <div class="ngx-fs-file-manager-error" *ngIf="progress == 100 && error != null">
         Failed to download <b>{{fileStats.name}}</b>: {{error}}
     </div>
     <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>

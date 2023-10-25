@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>File upload to {{path}}</h1>
 
 <mat-dialog-content>
-    <div *ngFor="let fileUpload of fileUploads" class="visa-fs-file-upload-dialog-item">
+    <div *ngFor="let fileUpload of fileUploads" class="ngx-fs-file-upload-dialog-item">
         <div *ngIf="cancelled">
             <div *ngIf="fileUpload.progress !== 100">
                 Cancelled upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
@@ -9,7 +9,7 @@
             <div *ngIf="fileUpload.progress === 100 && fileUpload.error == null">
                 Uploaded <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
             </div>
-            <div class="visa-fs-file-manager-error" *ngIf="fileUpload.progress === 100 && fileUpload.error != null">
+            <div class="ngx-fs-file-manager-error" *ngIf="fileUpload.progress === 100 && fileUpload.error != null">
                 Failed to upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>: {{fileUpload.error}}
             </div>
         </div>
@@ -23,7 +23,7 @@
             <div *ngIf="fileUpload.progress === 100 && fileUpload.error == null">
                 Uploaded <b>{{fileUpload.file.name | fileNameReducer:64}}</b>
             </div>
-            <div class="visa-fs-file-manager-error" *ngIf="fileUpload.progress === 100 && fileUpload.error != null">
+            <div class="ngx-fs-file-manager-error" *ngIf="fileUpload.progress === 100 && fileUpload.error != null">
                 Failed to upload <b>{{fileUpload.file.name | fileNameReducer:64}}</b>: {{fileUpload.error}}
             </div>
         </div>

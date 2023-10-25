@@ -13,7 +13,7 @@ import { NgxFileSysConfiguration } from '../ngx-file-sys.configuration';
 @Injectable({
     providedIn: 'root'
 })
-class VisaFileSystemHttpClient {
+class NgxFileSystemHttpClient {
 
     private readonly _headers: HttpHeaders;
 
@@ -60,7 +60,7 @@ class VisaFileSystemHttpClient {
 export class NgxFileSystemService {
 
     constructor(@Inject('config') private _config: NgxFileSysConfiguration,
-                private _http: VisaFileSystemHttpClient) {
+                private _http: NgxFileSystemHttpClient) {
     }
 
     public getDirectoryContent(path: string): Observable<DirectoryContent> {
