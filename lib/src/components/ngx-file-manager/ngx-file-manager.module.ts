@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { VisaFileManagerComponent } from './visa-file-manager.component';
+import { NgxFileManagerComponent } from './ngx-file-manager.component';
 import { ToolBarComponent } from './tool-bar';
 import { PathBarComponent } from './path-bar';
 import {
@@ -22,7 +22,7 @@ import { FileNameReducerPipe } from '../../pipes';
 
 @NgModule({
     declarations: [
-        VisaFileManagerComponent,
+        NgxFileManagerComponent,
         ToolBarComponent,
         PathBarComponent,
         FilesIconViewComponent,
@@ -50,8 +50,8 @@ import { FileNameReducerPipe } from '../../pipes';
     ],
     providers: [],
     exports: [
-        VisaFileManagerComponent
+        NgxFileManagerComponent
     ]
 })
-export class VisaFileManagerModule {
+export class NgxFileManagerModule {
 }

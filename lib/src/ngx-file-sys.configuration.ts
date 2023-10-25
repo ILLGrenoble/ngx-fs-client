@@ -1,4 +1,4 @@
-export class VisaFileSysConfiguration {
+export class NgxFileSysConfiguration {
     basePath: string;
     showParentFolder?: boolean;
     accessToken?: string;

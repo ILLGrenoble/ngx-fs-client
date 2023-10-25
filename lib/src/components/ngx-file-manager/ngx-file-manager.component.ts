@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Inject, OnDestroy, OnInit, Input, Output, ViewEncapsulation, ViewChild, ElementRef} from '@angular/core';
 import {BehaviorSubject, concatMap, filter, finalize, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
-import { VisaFileSystemService } from '../../services';
+import { NgxFileSystemService } from '../../services';
 import {
     CopyCutFileAction,
     DirectoryContent,
@@ -8,18 +8,19 @@ import {
     FileStats,
     FileSystemAction,
     FileSystemEvent,
-    LinkedPath, VisaFileSysConfiguration
+    LinkedPath
 } from '../../models';
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
+import { NgxFileSysConfiguration } from '../../ngx-file-sys.configuration';
 
 @Component({
-    selector: 'visa-file-manager',
-    templateUrl: './visa-file-manager.component.html',
-    styleUrls: ['./visa-file-manager.component.scss'],
+    selector: 'ngx-file-manager',
+    templateUrl: './ngx-file-manager.component.html',
+    styleUrls: ['./ngx-file-manager.component.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class VisaFileManagerComponent implements OnInit, OnDestroy {
+export class NgxFileManagerComponent implements OnInit, OnDestroy {
 
     @Output()
     directoryContent: DirectoryContent = null;
@@ -95,8 +96,8 @@ export class VisaFileManagerComponent implements OnInit, OnDestroy {
         }
     }
 
-    constructor(@Inject('config') private _config: VisaFileSysConfiguration,
-                private _fileSystemService: VisaFileSystemService,
+    constructor(@Inject('config') private _config: NgxFileSysConfiguration,
+                private _fileSystemService: NgxFileSystemService,
                 private _dialog: MatDialog) {
     }
 

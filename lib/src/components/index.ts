@@ -1,1 +1,1 @@
-export * from './visa-file-manager'
+export * from './ngx-file-manager'

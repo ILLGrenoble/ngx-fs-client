@@ -7,8 +7,8 @@ import {
     FileStats,
     UploadData,
     UploadProgress,
-    VisaFileSysConfiguration
 } from '../models';
+import { NgxFileSysConfiguration } from '../ngx-file-sys.configuration';
 
 @Injectable({
     providedIn: 'root'
@@ -17,7 +17,7 @@ class VisaFileSystemHttpClient {
 
     private readonly _headers: HttpHeaders;
 
-    constructor(@Inject('config') private _config: VisaFileSysConfiguration,
+    constructor(@Inject('config') private _config: NgxFileSysConfiguration,
                 private _http: HttpClient) {
         if (this._config.accessToken) {
             this._headers = new HttpHeaders().set('x-auth-token', this._config.accessToken);
@@ -57,9 +57,9 @@ class VisaFileSystemHttpClient {
 @Injectable({
     providedIn: 'root'
 })
-export class VisaFileSystemService {
+export class NgxFileSystemService {
 
-    constructor(@Inject('config') private _config: VisaFileSysConfiguration,
+    constructor(@Inject('config') private _config: NgxFileSysConfiguration,
                 private _http: VisaFileSystemHttpClient) {
     }
 

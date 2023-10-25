@@ -1,1 +1,1 @@
-export * from './visa-file-system.service'
+export * from './ngx-file-system.service'

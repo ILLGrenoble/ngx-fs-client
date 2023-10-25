@@ -86,7 +86,7 @@ Requests to the `Node FS Server` are made to the same host as the angular app: a
         "secure": false,
         "logLevel": "debug",
         "pathRewrite": {
-            "^/visafs/": "/"
+            "^/files/": "/"
         },
         "changeOrigin": true
     }

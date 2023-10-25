@@ -11,7 +11,7 @@ import {
     Subject,
     takeUntil,
 } from 'rxjs';
-import {VisaFileSystemService} from "../../../../services";
+import {NgxFileSystemService} from "../../../../services";
 
 @Component({
     selector: 'file-upload-dialog',
@@ -25,7 +25,7 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _completed: boolean = false;
     private _cancelled: boolean = false;
-    private _fileSystemService: VisaFileSystemService;
+    private _fileSystemService: NgxFileSystemService;
 
     private _fileUploads: FileUpload[] = [];
 
@@ -49,7 +49,7 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
                 @Inject(MAT_DIALOG_DATA) data: {
                     files: FileList,
                     path: string,
-                    fileSystemService: VisaFileSystemService}) {
+                    fileSystemService: NgxFileSystemService}) {
         this._files = data.files;
         this._path = data.path;
         this._fileSystemService = data.fileSystemService;
