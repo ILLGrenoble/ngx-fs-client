@@ -1,6 +1,6 @@
 # ngx-fs-client
 
-`ngx-fs-client` is an angular component for connecting to a remote _Node FS Server_. It provides access to a remote filesystem and perform standard file system operations similar to a stand file manager.
+`ngx-fs-client` is an angular component for connecting to a remote _Node FS Server_. It provides access to a remote filesystem and perform standard file system operations similar to a standard file manager.
 
 The `Node FS Server` runs as a user process on a remote server and provides a simple REST API to access the user's file system (system files are inaccessible). This component can be integrated into an angular app to provide remote access to the user's file system. Due to security concerns the client is not intended to access the server directly but rather use a server-side proxy to manage access/authorisation rights (eg running the FS Server within a micro-service architecture).
 
