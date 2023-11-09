@@ -20,6 +20,7 @@ import {
     PathBarComponent,
     ToolBarComponent
 } from './components';
+import {HttpClientModule} from "@angular/common/http";
 
 @NgModule({
     declarations: [
@@ -35,6 +36,7 @@ import {
         FileNameReducerPipe,
     ],
     imports: [
+        HttpClientModule,
         AsyncPipe,
         NgForOf,
         NgIf,

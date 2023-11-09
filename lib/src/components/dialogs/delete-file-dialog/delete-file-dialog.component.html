@@ -5,7 +5,9 @@
         Delete {{fileStats.type === 'directory' ? "folder" : "file"}} <b>{{fileStats.name}}</b>?
     </div>
     <div class="ngx-fs-delete-file-dialog-warning">
-        Warning: this action cannot be undone!
+        <div class="ngx-fs-delete-file-dialog-warning-text">
+            Warning: this action cannot be undone!
+        </div>
     </div>
 </mat-dialog-content>
 

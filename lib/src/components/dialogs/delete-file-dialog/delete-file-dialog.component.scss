@@ -1,8 +1,10 @@
 .ngx-fs-delete-file-dialog-warning {
-    border: 1px solid #bb720c;
     background-color: #fcba6d;
     width: 100%;
-    line-height: 16px;
-    padding: 16px;
+    line-height: 30px;
     margin-top: 16px;
+}
+
+.ngx-fs-delete-file-dialog-warning-text {
+    margin: 8px;
 }

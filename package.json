@@ -4,7 +4,7 @@
     "version": "0.9.4",
     "scripts": {
         "ng": "ng",
-        "start": "ng serve",
+        "start": "ng serve --proxy-config proxy.conf.json",
         "build:lib": "ng build lib --configuration production",
         "postbuild:lib": "cp ./README.md ./dist/lib && cp ./LICENSE ./dist/lib",
         "watch": "ng build --watch --configuration development",
