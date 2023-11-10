@@ -135,5 +135,5 @@ npm start
 
 This will start the angular development server. You can then access the demo at http://localhost:4200.
 
-> Note, the demo gives unauthenticated access to you local files. However, by default, the `Node FS API` server only listens to connections on localhost.
+> Note, the demo gives unauthenticated access to your local files. The `Node FS API` server only listens to connections on localhost... but use with care anyway :-)
 
