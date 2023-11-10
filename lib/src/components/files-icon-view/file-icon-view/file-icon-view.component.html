@@ -18,8 +18,8 @@
          [dndAllowExternal]="true"
     >
         <div class="ngx-fs-file-icon-view-icon">
-            <mat-icon color="primary" class="ngx-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
-            <mat-icon color="primary" class="ngx-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
+            <mat-icon color="primary" class="ngx-fs-md-dark ngx-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
+            <mat-icon color="primary" class="ngx-fs-md-dark ngx-fs-file-icon-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
         </div>
 
         <input type="text" #fileNameInput class="ngx-fs-file-icon-view-name-edit" [ngClass]="{'ngx-fs-hidden': !isFileNameEdit}"
