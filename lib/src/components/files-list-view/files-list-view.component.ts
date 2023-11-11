@@ -30,22 +30,21 @@ import {MatTable} from "@angular/material/table";
     encapsulation: ViewEncapsulation.None,
     host: { class: 'ngx-fs-files-list-view-component'},
 })
-export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy {
+export class FilesListViewComponent implements OnInit, OnDestroy {
 
     private _columns = [
-        {field: 'type', resizable: false, width: 3.5, index: 0},
-        {field: 'name', resizable: true, width: 50, index: 1},
-        {field: 'lastModified', resizable: true, width: 30, index: 2},
-        {field: 'size', resizable: true, width: 20, index: 3},
+        {field: 'type', width: 5},
+        {field: 'name', width: 50},
+        {field: 'lastModified', width: 30},
+        {field: 'size', width: 20},
     ]
 
-    public displayedColumns: string[] = [];
+    public displayedColumns = this._columns.map(column => column.field);
 
-    private pressed = false;
-    private currentResizeIndex: number;
-    private startX: number;
-    private startWidth: number;
-    private isResizingRight: boolean;
+    private _resizeInProgress = false;
+    private _currentResizeIndex: number;
+    private _resizeStartX: number;
+    private _resizeStartWidth: number;
     private resizableMousemove: () => void;
     private resizableMouseup: () => void;
 
@@ -134,6 +133,9 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
     private _acceptDrop = false;
     private _copyCutFileAction: CopyCutFileAction;
 
+    private _isSingleClick: Boolean = true;
+    private _fileWithNameEdit: FileStats = null;
+
     get items(): FileStats[] {
         return this.directoryContent ? this.directoryContent.content : [];
     }
@@ -162,18 +164,12 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.selectedFile = event.fileStats;
             }
         })
-        this.setDisplayedColumns();
-    }
-
-    ngAfterViewInit() {
-        this.setTableResize(this.matTableRef.nativeElement.clientWidth);
     }
 
     ngOnDestroy(): void {
         this._destroy$.next(true);
         this._destroy$.unsubscribe();
     }
-
 
     setTableResize(tableWidth: number) {
         let totalWidth = this._columns.reduce((sum, column) => {
@@ -186,41 +182,13 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
         });
     }
 
-    setDisplayedColumns() {
-        this._columns.forEach((column, index) => {
-            column.index = index;
-            this.displayedColumns[index] = column.field;
-        });
-    }
-
     onResizeColumn(event: any, index: number) {
-        this.checkResizing(event, index);
-        this.currentResizeIndex = index;
-        this.pressed = true;
-        this.startX = event.pageX;
-        this.startWidth = event.target.parentElement.clientWidth;
+        this._currentResizeIndex = index;
+        this._resizeInProgress = true;
+        this._resizeStartX = event.pageX;
+        this._resizeStartWidth = event.target.parentElement.clientWidth;
         event.preventDefault();
         this.mouseMove(index);
-    }
-
-    private checkResizing(event: any, index: number) {
-        const cellData = this.getCellData(index);
-        if (
-            index === 0 ||
-            (Math.abs(event.pageX - cellData.right) < cellData.width / 2 &&
-                index !== this._columns.length - 1)
-        ) {
-            this.isResizingRight = true;
-        } else {
-            this.isResizingRight = false;
-        }
-    }
-
-    private getCellData(index: number) {
-        const headerRow =
-            this.matTableRef.nativeElement.children[0].querySelector('tr');
-        const cell = headerRow.children[index];
-        return cell.getBoundingClientRect();
     }
 
     mouseMove(index: number) {
@@ -228,10 +196,10 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
             'document',
             'mousemove',
             (event) => {
-                if (this.pressed && event.buttons) {
-                    const dx = this.isResizingRight ? event.pageX - this.startX : -event.pageX + this.startX;
-                    const width = this.startWidth + dx;
-                    if (this.currentResizeIndex === index && width > 50) {
+                if (this._resizeInProgress && event.buttons) {
+                    const dx = event.pageX - this._resizeStartX;
+                    const width = this._resizeStartWidth + dx;
+                    if (this._currentResizeIndex === index && width > 50) {
                         this.setColumnWidthChanges(index, width);
                     }
                 }
@@ -242,9 +210,9 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
             'document',
             'mouseup',
             (event) => {
-                if (this.pressed) {
-                    this.pressed = false;
-                    this.currentResizeIndex = -1;
+                if (this._resizeInProgress) {
+                    this._resizeInProgress = false;
+                    this._currentResizeIndex = -1;
                     this.resizableMousemove();
                     this.resizableMouseup();
                 }
@@ -256,7 +224,7 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
         const orgWidth = this._columns[index].width;
         const dx = width - orgWidth;
         if (dx !== 0) {
-            const j = this.isResizingRight ? index + 1 : index - 1;
+            const j = index + 1;
             const newWidth = this._columns[j].width - dx;
             if (newWidth > 50) {
                 this._columns[index].width = width;
@@ -288,10 +256,6 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
         this._contextMenu.openMenu();
     }
 
-    onFileSystemAction(action: FileSystemAction) {
-        this.fileSystemAction.emit(action);
-    }
-
     onNewFile(): void {
         this.fileSystemAction.emit(new FileSystemAction({path: this.path, type: 'NEW_FILE'}));
     }
@@ -300,18 +264,51 @@ export class FilesListViewComponent implements OnInit, AfterViewInit, OnDestroy 
         this.fileSystemAction.emit(new FileSystemAction({path: this.path, type: 'NEW_FOLDER'}));
     }
 
-    // onFileDoubleClick(fileStats: FileStats): void {
-    //     if (fileStats.type === 'directory') {
-    //         this.pathChange.emit(fileStats.path);
-    //
-    //     } else {
-    //         this.openDownloadFileDialog(fileStats)
-    //     }
-    // }
-
     onClick(): void {
         this.selectedFile = null;
         this._renameInProgress = null;
+    }
+
+    onDoubleClickFile(event: Event, fileStats: FileStats): void {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this._isSingleClick = false;
+
+        if (!this.renameInProgress) {
+            this.selectedFileChange.emit(fileStats);
+            if (fileStats.type === 'directory') {
+                this.pathChange.emit(fileStats.path);
+
+            } else {
+                // this.openDownloadFileDialog(fileStats)
+            }
+        }
+    }
+
+    onClickFile(event: Event, fileStats: FileStats): void {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this._isSingleClick = true;
+        if (this.selectedFile != null && this.selectedFile === fileStats) {
+            setTimeout(() => {
+                if (this._isSingleClick) {
+                    if (this._fileWithNameEdit !== fileStats) {
+                        this.editFileName(fileStats);
+                    }
+                }
+            }, 250)
+        }
+        this.selectedFileChange.emit(fileStats);
+    }
+
+    isSelectedFile(fileStats: FileStats): boolean {
+        return this.selectedFile === fileStats;
+    }
+
+    private editFileName(fileStats: FileStats): void {
+
     }
 
     onDrop(event: DndDropEvent): void {

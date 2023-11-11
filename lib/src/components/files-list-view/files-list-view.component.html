@@ -16,7 +16,12 @@
             <ng-container matColumnDef="type">
                 <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-cell">
                 </th>
-                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell">
+                <td mat-cell *matCellDef="let fileStats"
+                    class="ngx-fs-files-list-view-table-cell"
+                    [ngClass]="{'ngx-fs-files-list-view-table-cell__selected': isSelectedFile(fileStats)}"
+                    (dblclick)="onDoubleClickFile($event, fileStats)"
+                    (click)="onClickFile($event, fileStats)"
+                >
                     <mat-icon color="primary" class="ngx-fs-md-dark ngx-fs-files-list-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
                     <mat-icon color="primary" class="ngx-fs-md-dark ngx-fs-files-list-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
                 </td>
@@ -32,7 +37,14 @@
                         </div>
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell"> {{fileStats.name}} </td>
+                <td mat-cell *matCellDef="let fileStats"
+                    class="ngx-fs-files-list-view-table-cell"
+                    [ngClass]="{'ngx-fs-files-list-view-table-cell__selected': isSelectedFile(fileStats)}"
+                    (dblclick)="onDoubleClickFile($event, fileStats)"
+                    (click)="onClickFile($event, fileStats)"
+                >
+                    {{fileStats.name}}
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="lastModified">
@@ -45,7 +57,14 @@
                         </div>
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell"> {{fileStats.last_modified | date:'d MMMM y, HH:mm'}} </td>
+                <td mat-cell *matCellDef="let fileStats"
+                    class="ngx-fs-files-list-view-table-cell"
+                    [ngClass]="{'ngx-fs-files-list-view-table-cell__selected': isSelectedFile(fileStats)}"
+                    (dblclick)="onDoubleClickFile($event, fileStats)"
+                    (click)="onClickFile($event, fileStats)"
+                >
+                    {{fileStats.last_modified | date:'d MMMM y, HH:mm'}}
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="size">
@@ -56,13 +75,18 @@
                         </div>
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell">
+                <td mat-cell *matCellDef="let fileStats"
+                    class="ngx-fs-files-list-view-table-cell"
+                    [ngClass]="{'ngx-fs-files-list-view-table-cell__selected': isSelectedFile(fileStats)}"
+                    (dblclick)="onDoubleClickFile($event, fileStats)"
+                    (click)="onClickFile($event, fileStats)"
+                >
                     <div *ngIf="fileStats.type === 'directory'">--</div>
                     <div *ngIf="fileStats.type === 'file'">{{fileStats.size | fileSize:1}}</div>
                 </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
     </div>

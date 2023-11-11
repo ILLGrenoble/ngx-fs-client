@@ -37,7 +37,7 @@
 }
 
 .ngx-fs-files-list-view-file-or-folder {
-    font-size: 20px;
+    //font-size: 20px;
     line-height: 28px;
 }
 
@@ -56,6 +56,11 @@ tr.mat-mdc-row, tr.mat-mdc-header-row {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: default;
+
+    &__selected {
+        background-color: #e5e5e5 !important;
+    }
 }
 .ngx-fs-files-list-view-table-header-cell-inner {
     display: flex;
