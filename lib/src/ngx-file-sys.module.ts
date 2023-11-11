@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { NgxFileSystemServiceFactory } from './services';
-import { FileNameReducerPipe } from './pipes';
-import { AsyncPipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import {FileNameReducerPipe, FileSizePipe} from './pipes';
+import {AsyncPipe, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,12 +15,14 @@ import {
     DeleteFileDialogComponent,
     DownloadFileDialogComponent, FileDownloadingDialogComponent,
     FileIconViewComponent,
-    FilesIconViewComponent, FileUploadDialogComponent,
+    FilesIconViewComponent, FilesListViewComponent, FileUploadDialogComponent,
     NgxFileManagerComponent,
     PathBarComponent,
     ToolBarComponent
 } from './components';
 import {HttpClientModule} from "@angular/common/http";
+import {MatTableModule} from "@angular/material/table";
+import {MatSortModule} from "@angular/material/sort";
 
 @NgModule({
     declarations: [
@@ -28,12 +30,14 @@ import {HttpClientModule} from "@angular/common/http";
         ToolBarComponent,
         PathBarComponent,
         FilesIconViewComponent,
+        FilesListViewComponent,
         FileIconViewComponent,
         DownloadFileDialogComponent,
         DeleteFileDialogComponent,
         FileDownloadingDialogComponent,
         FileUploadDialogComponent,
         FileNameReducerPipe,
+        FileSizePipe,
     ],
     imports: [
         HttpClientModule,
@@ -48,8 +52,11 @@ import {HttpClientModule} from "@angular/common/http";
         MatInputModule,
         MatProgressBarModule,
         MatMenuModule,
+        MatTableModule,
+        MatSortModule,
         FormsModule,
         DndModule,
+        DatePipe,
     ],
     exports: [
         NgxFileManagerComponent,

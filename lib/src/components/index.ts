@@ -1,5 +1,6 @@
 export * from './ngx-file-manager.component'
 export * from './dialogs'
 export * from './files-icon-view'
+export * from './files-list-view'
 export * from './path-bar'
 export * from './tool-bar'

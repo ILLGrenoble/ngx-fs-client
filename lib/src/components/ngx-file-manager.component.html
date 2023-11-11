@@ -11,7 +11,7 @@
     <path-bar
         [(path)]="path"
     ></path-bar>
-    <files-icon-view
+    <files-list-view
         [(path)]="path"
         [directoryContent]="directoryContent"
         [directoryContentLoading]="directoryContentLoading"
@@ -20,6 +20,6 @@
         (fileSystemAction)="onFileSystemAction($event)"
         [fileSystemEvent$]="fileSystemEvent$"
         [(copyCutFileAction)]="copyCutFileAction"
-    ></files-icon-view>
+    ></files-list-view>
 
 </div>

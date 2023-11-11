@@ -1,0 +1,93 @@
+<div class="ngx-fs-files-list-view-container" (contextmenu)="openMenu($event, menuTrigger)">
+    <div *ngIf="directoryContentLoading" class="ngx-fs-files-list-view-loading">
+        <mat-spinner></mat-spinner>
+    </div>
+    <div dndDropzone
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (dndDrop)="onDrop($event)"
+        [dndAllowExternal]="true"
+        (click)="onClick()"
+
+         [ngClass]="{'ngx-fs-files-list-view-contents__drag-over': acceptDrop, 'ngx-fs-hidden': directoryContentLoading}"
+        class="list"
+    >
+        <table mat-table [dataSource]="items" class="mat-elevation-z0">
+            <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-cell">
+                </th>
+                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell">
+                    <mat-icon color="primary" class="ngx-fs-md-dark ngx-fs-files-list-view-file-or-folder" *ngIf="fileStats.type === 'directory'">folder</mat-icon>
+                    <mat-icon color="primary" class="ngx-fs-md-dark ngx-fs-files-list-view-file-or-folder" *ngIf="fileStats.type === 'file'">description</mat-icon>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-header-cell">
+                    <div class="ngx-fs-files-list-view-table-header-cell-inner">
+                        <div class="ngx-fs-files-list-view-table-header-cell-name">
+                            Name
+                        </div>
+                        <div class="ngx-fs-files-list-view-table-resize-handle" (mousedown)="onResizeColumn($event, 1)">
+                        </div>
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell"> {{fileStats.name}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="lastModified">
+                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-cell">
+                    <div class="ngx-fs-files-list-view-table-header-cell-inner">
+                        <div class="ngx-fs-files-list-view-table-header-cell-name">
+                            Date modified
+                        </div>
+                        <div class="ngx-fs-files-list-view-table-resize-handle" (mousedown)="onResizeColumn($event, 2)">
+                        </div>
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell"> {{fileStats.last_modified | date:'d MMMM y, HH:mm'}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="size">
+                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-cell">
+                    <div class="ngx-fs-files-list-view-table-header-cell-inner">
+                        <div class="ngx-fs-files-list-view-table-header-cell-name">
+                            Size
+                        </div>
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let fileStats" class="ngx-fs-files-list-view-table-cell">
+                    <div *ngIf="fileStats.type === 'directory'">--</div>
+                    <div *ngIf="fileStats.type === 'file'">{{fileStats.size | fileSize:1}}</div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </div>
+    <div style="visibility: hidden; position: fixed"
+         #menuTrigger="matMenuTrigger"
+         [style.left]="contextMenuPosition.x"
+         [style.top]="contextMenuPosition.y"
+         [matMenuTriggerFor]="folderActionMenu">
+    </div>
+</div>
+
+
+<mat-menu #folderActionMenu="matMenu" [overlapTrigger]="false">
+    <ng-template matMenuContent>
+        <button mat-menu-item (click)="onNewFile()">
+            <mat-icon>insert_drive_file</mat-icon>
+            <span>New File</span>
+        </button>
+        <button mat-menu-item (click)="onNewFolder()">
+            <mat-icon>create_new_folder</mat-icon>
+            <span>New Folder</span>
+        </button>
+        <button mat-menu-item (click)="pasteFile()" [disabled]="copyCutFileAction == null">
+            <mat-icon>content_paste</mat-icon>
+            <span>Paste</span>
+        </button>
+    </ng-template>
+</mat-menu>

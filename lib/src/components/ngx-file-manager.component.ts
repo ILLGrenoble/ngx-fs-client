@@ -1,4 +1,13 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Input, Output, ViewEncapsulation} from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    OnDestroy,
+    OnInit,
+    Input,
+    Output,
+    ViewEncapsulation,
+    AfterViewInit
+} from '@angular/core';
 import {BehaviorSubject, concatMap, filter, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { NgxFileSystemService, NgxFileSystemServiceFactory } from '../services';
 import {
