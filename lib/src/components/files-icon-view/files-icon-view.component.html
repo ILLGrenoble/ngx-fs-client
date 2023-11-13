@@ -5,7 +5,7 @@
     <div *ngIf="!directoryContentLoading"
         dndDropzone
         (dragover)="onDragOver($event)"
-        (dragleave)="onDragLeave($event)"
+        (dragleave)="onDragLeave()"
         (dndDrop)="onDrop($event)"
         [dndAllowExternal]="true"
         (click)="onClick()"

@@ -189,7 +189,7 @@ export class FilesIconViewComponent implements OnInit, OnDestroy {
         }
     }
 
-    onDragLeave(event: DragEvent): void {
+    onDragLeave(): void {
         this._acceptDrop = false;
     }
 
