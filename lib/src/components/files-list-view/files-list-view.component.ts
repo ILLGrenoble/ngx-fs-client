@@ -33,7 +33,6 @@ import {MatTable} from "@angular/material/table";
 export class FilesListViewComponent implements OnInit, OnDestroy {
 
     private _columns = [
-        {field: 'type', width: 5},
         {field: 'name', width: 50},
         {field: 'lastModified', width: 30},
         {field: 'size', width: 20},
@@ -57,6 +56,15 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     public contextMenuPosition = { x: '0px', y: '0px' };
 
     private _directoryContent: DirectoryContent;
+
+    private _selectedFile: FileStats;
+    private _renameInProgress: FileStats;
+    private _destroy$: Subject<boolean> = new Subject<boolean>();
+    private _acceptDrop = false;
+    private _copyCutFileAction: CopyCutFileAction;
+
+    private _isSingleClick: Boolean = true;
+    private _fileNameEdit: string = null;
 
     @Input()
     path: string;
@@ -120,6 +128,9 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     set renameInProgress(fileStats: FileStats) {
         if (this._renameInProgress != fileStats) {
             this._renameInProgress = fileStats;
+            if (fileStats != null) {
+                this.editFileName(fileStats);
+            }
             this.renameInProgressChange.emit(fileStats);
         }
     }
@@ -127,21 +138,20 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     @Output()
     renameInProgressChange = new EventEmitter<FileStats>();
 
-    private _selectedFile: FileStats;
-    private _renameInProgress: FileStats;
-    private _destroy$: Subject<boolean> = new Subject<boolean>();
-    private _acceptDrop = false;
-    private _copyCutFileAction: CopyCutFileAction;
-
-    private _isSingleClick: Boolean = true;
-    private _fileWithNameEdit: FileStats = null;
-
     get items(): FileStats[] {
         return this.directoryContent ? this.directoryContent.content : [];
     }
 
     get acceptDrop(): boolean {
         return this._acceptDrop;
+    }
+
+    get fileNameEdit(): string {
+        return this._fileNameEdit;
+    }
+
+    set fileNameEdit(value: string) {
+        this._fileNameEdit = value;
     }
 
     constructor(private _dialog: MatDialog,
@@ -155,7 +165,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         ).subscribe(event => {
             if (event.type === 'CREATED') {
                 this.selectedFile = event.fileStats;
-                this._renameInProgress = event.fileStats;
+                this.renameInProgress = event.fileStats;
 
             } else if (event.type === 'MOVED') {
                 this.selectedFile = event.fileStats;
@@ -266,7 +276,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
 
     onClick(): void {
         this.selectedFile = null;
-        this._renameInProgress = null;
+        this.renameInProgress = null;
     }
 
     onDoubleClickFile(event: Event, fileStats: FileStats): void {
@@ -294,12 +304,21 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         if (this.selectedFile != null && this.selectedFile === fileStats) {
             setTimeout(() => {
                 if (this._isSingleClick) {
-                    if (this._fileWithNameEdit !== fileStats) {
+                    if (this._renameInProgress !== fileStats) {
                         this.editFileName(fileStats);
                     }
                 }
             }, 250)
         }
+
+        if (this._renameInProgress && this._renameInProgress !== fileStats) {
+            this.cancelFileNameChange();
+        }
+
+        this.selectedFileChange.emit(fileStats);
+    }
+
+    onRightClickFile(event: Event, fileStats: FileStats): void {
         this.selectedFileChange.emit(fileStats);
     }
 
@@ -307,8 +326,30 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         return this.selectedFile === fileStats;
     }
 
-    private editFileName(fileStats: FileStats): void {
+    editFileName(fileStats: FileStats): void {
+        if (fileStats.name !== '..') {
+            this._fileNameEdit = fileStats.name;
+            this.renameInProgressChange.emit(fileStats);
+        }
+    }
 
+    updateFileName(): void {
+        if (this._renameInProgress.name !== this._fileNameEdit) {
+            const oldPath = this._renameInProgress.path;
+            const newPath = `${oldPath.substring(0, oldPath.lastIndexOf('/'))}/${this._fileNameEdit}`;
+
+            this.fileSystemAction.emit(new FileSystemAction({fileStats: this._renameInProgress, path: newPath, type: 'MOVE'}));
+
+            this.renameInProgressChange.emit(null);
+
+        } else {
+            this.renameInProgressChange.emit(null);
+        }
+    }
+
+    cancelFileNameChange(): void {
+        this._fileNameEdit = null;
+        this.renameInProgressChange.emit(null);
     }
 
     onDrop(event: DndDropEvent): void {
@@ -326,8 +367,53 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         }
     }
 
+    onDropOverFolder(event: DndDropEvent, folder: FileStats): void {
+        event.event.preventDefault();
+        event.event.stopPropagation();
+
+        if (event.isExternal) {
+            this.fileSystemAction.emit(new FileSystemAction({path: folder.path, files: event.event.dataTransfer.files, type: 'UPLOAD'}));
+
+        } else {
+            const fileStats = event.data;
+            this.fileSystemAction.emit(new FileSystemAction({fileStats, path: `${folder.path}/${fileStats.name}`, type: 'MOVE'}));
+        }
+
+    }
+
+    onDragOverFolder(event: DragEvent, folder: FileStats): void {
+        event.preventDefault();
+        event.stopPropagation();
+
+        console.log('dragOver ' + folder.name);
+    }
+
+    onDragStart(event: DragEvent, fileStats: FileStats): void {
+        if (this.selectedFile == null || this.selectedFile !== fileStats) {
+            setTimeout(() => this.selectedFileChange.emit(fileStats), 20);
+        }
+    }
+
     onDragLeave(event: DragEvent): void {
         this._acceptDrop = false;
+    }
+
+    downloadFile(): void {
+
+    }
+
+    deleteFile(): void {
+        this.fileSystemAction.emit(new FileSystemAction({fileStats: this.selectedFile, type: 'DELETE'}));
+    }
+
+    cutFile(): void {
+        this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.selectedFile, type: 'CUT'}));
+    }
+
+    copyFile(): void {
+        if (this.selectedFile.type === 'file') {
+            this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.selectedFile, type: 'COPY'}));
+        }
     }
 
     pasteFile(): void {

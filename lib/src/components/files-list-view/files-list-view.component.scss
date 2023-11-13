@@ -5,6 +5,20 @@
     overflow: hidden;
 }
 
+
+.ngx-fs-files-list-view-drop-zone {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    border: 3px solid transparent;
+    border-radius: 6px;
+
+    &__drag-over {
+        border: 3px dashed #cccccc;
+    }
+}
+
 .ngx-fs-files-list-view-container {
     display: flex;
     flex-direction: column;
@@ -28,17 +42,35 @@
     align-items: flex-start;
     align-content: flex-start;
     overflow-y: auto;
-    border: 3px solid transparent;
-    border-radius: 6px;
+}
+
+
+.ngx-fs-files-list-view-icon-and-name {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    width: fit-content;
 
     &__drag-over {
-        border: 3px dashed #cccccc;
+        background-color: #cccccc;
+        border-radius: 4px;
     }
+
+    &__dragging {
+        background-color: white;
+        border-radius: 4px;
+    }
+}
+
+.ngx-fs-files-list-view-name {
+    margin: 0 6px;
 }
 
 .ngx-fs-files-list-view-file-or-folder {
     //font-size: 20px;
     line-height: 28px;
+    margin: 0 4px;
 }
 
 .material-icons.ngx-fs-md-dark { color: #51a6e3; }
@@ -57,6 +89,7 @@ tr.mat-mdc-row, tr.mat-mdc-header-row {
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: default;
+    user-select: none;
 
     &__selected {
         background-color: #e5e5e5 !important;
@@ -85,4 +118,25 @@ table th:hover .ngx-fs-files-list-view-table-resize-handle {
     width: 2px;
     cursor: col-resize;
     opacity: 0.2;
+}
+
+.ngx-fs-file-list-view-name-view {
+}
+
+.ngx-fs-file-list-view-name-edit {
+    line-height: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 100%;
+    text-align: left;
+    word-wrap: break-word;
+    //border-radius: 4px;
+
+    //color: #5e5e5e;
+    border: 2px solid #4ca4dd;
+    background-color: #edebeb;
+
+    &::selection {
+        background-color: #a0bbff;
+    }
 }

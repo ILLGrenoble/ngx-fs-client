@@ -50,7 +50,7 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
     renameInProgress: FileStats = null;
 
     private _fileSystemService: NgxFileSystemService;
-    private _linkedPath: LinkedPath = new LinkedPath({name: ''});
+    private _linkedPath: LinkedPath = new LinkedPath({name: '/tmp/bbbb'});
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
     private _showHidden = false;
