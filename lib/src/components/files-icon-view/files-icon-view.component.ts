@@ -8,9 +8,9 @@ import {
     FileSystemEvent,
 } from '../../models';
 import {MatDialog} from "@angular/material/dialog";
-import {DownloadFileDialogComponent} from "./dialogs";
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
+import {DownloadFileDialogComponent} from "../dialogs";
 
 @Component({
     selector: 'files-icon-view',

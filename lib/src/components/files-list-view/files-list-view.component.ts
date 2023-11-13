@@ -22,6 +22,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
 import {MatTable} from "@angular/material/table";
+import {DownloadFileDialogComponent} from "../dialogs";
 
 @Component({
     selector: 'files-list-view',
@@ -266,6 +267,15 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         this._contextMenu.openMenu();
     }
 
+    openDownloadFileDialog(fileStats: FileStats) {
+        const dialogRef = this._dialog.open(DownloadFileDialogComponent, {data: {fileStats}});
+        dialogRef.afterClosed().subscribe(res => {
+            if (res) {
+                this.fileSystemAction.emit(new FileSystemAction({fileStats, type: 'DOWNLOAD'}));
+            }
+        });
+    }
+
     onNewFile(): void {
         this.fileSystemAction.emit(new FileSystemAction({path: this.path, type: 'NEW_FILE'}));
     }
@@ -291,7 +301,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
                 this.pathChange.emit(fileStats.path);
 
             } else {
-                // this.openDownloadFileDialog(fileStats)
+                this.openDownloadFileDialog(fileStats)
             }
         }
     }
