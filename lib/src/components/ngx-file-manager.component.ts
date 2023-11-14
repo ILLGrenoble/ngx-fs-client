@@ -6,7 +6,6 @@ import {
     Input,
     Output,
     ViewEncapsulation,
-    AfterViewInit
 } from '@angular/core';
 import {BehaviorSubject, concatMap, filter, from, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import { NgxFileSystemService, NgxFileSystemServiceFactory } from '../services';
@@ -17,11 +16,12 @@ import {
     FileStats,
     FileSystemAction,
     FileSystemEvent,
-    LinkedPath
+    LinkedPath, ViewType
 } from '../models';
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {DeleteFileDialogComponent, FileDownloadingDialogComponent, FileUploadDialogComponent} from "./dialogs";
 import { NgxFileSysContext } from '../ngx-file-sys.context';
+
 
 @Component({
     selector: 'ngx-file-manager',
@@ -49,12 +49,14 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
     selectedFile: FileStats = null;
     renameInProgress: FileStats = null;
 
+
     private _fileSystemService: NgxFileSystemService;
-    private _linkedPath: LinkedPath = new LinkedPath({name: '/tmp/bbbb'});
+    private _linkedPath: LinkedPath = new LinkedPath({name: ''});
     private _destroy$: Subject<boolean> = new Subject<boolean>();
     private _uploadDialog: MatDialogRef<FileUploadDialogComponent> = null;
     private _showHidden = false;
     private _copyCutFileAction: CopyCutFileAction;
+    private _viewType = ViewType.ICON_VIEW_TYPE;
 
     get path(): string {
         let path = this._linkedPath.name;
@@ -110,6 +112,14 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
         } else {
             this._copyCutFileAction = action;
         }
+    }
+
+    get viewType(): ViewType {
+        return this._viewType;
+    }
+
+    set viewType(value: ViewType) {
+        this._viewType = value;
     }
 
     constructor(private _fileSystemServiceFactory: NgxFileSystemServiceFactory,
@@ -328,4 +338,6 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
 
         return blob;
     }
+
+    protected readonly ViewType = ViewType;
 }

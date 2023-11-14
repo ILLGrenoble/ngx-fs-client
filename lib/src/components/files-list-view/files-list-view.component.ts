@@ -391,11 +391,9 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
 
     }
 
-    onDragOverFolder(event: DragEvent, folder: FileStats): void {
+    onDragOverFolder(event: DragEvent): void {
         event.preventDefault();
         event.stopPropagation();
-
-        console.log('dragOver ' + folder.name);
     }
 
     onDragStart(event: DragEvent, fileStats: FileStats): void {

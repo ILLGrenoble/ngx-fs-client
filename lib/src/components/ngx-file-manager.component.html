@@ -7,11 +7,12 @@
         [(renameInProgress)]="renameInProgress"
         (fileSystemAction)="onFileSystemAction($event)"
         [(copyCutFileAction)]="copyCutFileAction"
+        [(viewType)]="viewType"
     ></tool-bar>
     <path-bar
         [(path)]="path"
     ></path-bar>
-    <files-list-view
+    <files-list-view *ngIf="viewType === ViewType.LIST_VIEW_TYPE"
         [(path)]="path"
         [directoryContent]="directoryContent"
         [directoryContentLoading]="directoryContentLoading"
@@ -21,5 +22,15 @@
         [fileSystemEvent$]="fileSystemEvent$"
         [(copyCutFileAction)]="copyCutFileAction"
     ></files-list-view>
+    <files-icon-view *ngIf="viewType === ViewType.ICON_VIEW_TYPE"
+        [(path)]="path"
+        [directoryContent]="directoryContent"
+        [directoryContentLoading]="directoryContentLoading"
+        [(selectedFile)]="selectedFile"
+        [(renameInProgress)]="renameInProgress"
+        (fileSystemAction)="onFileSystemAction($event)"
+        [fileSystemEvent$]="fileSystemEvent$"
+        [(copyCutFileAction)]="copyCutFileAction"
+    ></files-icon-view>
 
 </div>

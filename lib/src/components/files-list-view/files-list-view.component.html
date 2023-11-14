@@ -40,7 +40,7 @@
                          [dndDraggable]="fileStats"
                          [dndDisableDragIf]="fileStats.name === '..'"
                          [dndEffectAllowed]="'all'"
-                         (dndDragover)="onDragOverFolder($event, fileStats)"
+                         (dndDragover)="onDragOverFolder($event)"
                          (dndDrop)="onDropOverFolder($event, fileStats)"
                          (dndStart)="onDragStart($event, fileStats)"
                          [dndDisableDropIf]="fileStats.type === 'file'"

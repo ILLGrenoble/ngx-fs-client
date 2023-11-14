@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
-import { CopyCutFileAction, FileStats, FileSystemAction, LinkedPath } from '../../models';
+import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
+import {CopyCutFileAction, FileStats, FileSystemAction, LinkedPath, ViewType} from '../../models';
 
 export interface PathMenuItem {
     name: string;
@@ -77,6 +77,13 @@ export class ToolBarComponent {
     @Output()
     fileSystemAction = new EventEmitter<FileSystemAction>();
 
+
+    @Input()
+    viewType: ViewType;
+
+    @Output()
+    viewTypeChange = new EventEmitter<ViewType>();
+
     get basename(): string {
         return this._basename;
     }
@@ -137,4 +144,17 @@ export class ToolBarComponent {
         this.pathChange.emit(pathMenuItem.path);
     }
 
+    onSelectListView(): void {
+        if (this.viewType !== ViewType.LIST_VIEW_TYPE) {
+            this.viewTypeChange.emit(ViewType.LIST_VIEW_TYPE)
+        }
+    }
+
+    onSelectIconView(): void {
+        if (this.viewType !== ViewType.ICON_VIEW_TYPE) {
+            this.viewTypeChange.emit(ViewType.ICON_VIEW_TYPE)
+        }
+    }
+
+    protected readonly ViewType = ViewType;
 }

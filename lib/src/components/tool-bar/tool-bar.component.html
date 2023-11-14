@@ -15,15 +15,21 @@
             <button mat-menu-item *ngFor="let item of pathMenuItems" (click)="onPathMenuItemClick(item)">{{item.name}}</button>
         </mat-menu>
     </div>
+    <div class="ngx-fs-tool-bar-view-type-button">
+        <button mat-icon-button [matMenuTriggerFor]="viewTypeMenu">
+            <mat-icon *ngIf="viewType === ViewType.LIST_VIEW_TYPE">list</mat-icon>
+            <mat-icon *ngIf="viewType === ViewType.ICON_VIEW_TYPE">view_comfy</mat-icon>
+        </button>
+    </div>
     <div class="ngx-fs-tool-bar-action-button">
-        <button mat-icon-button [matMenuTriggerFor]="actionmenu">
+        <button mat-icon-button [matMenuTriggerFor]="actionMenu">
             <mat-icon>more_horiz</mat-icon>
         </button>
     </div>
 </div>
 
 
-<mat-menu #actionmenu="matMenu">
+<mat-menu #actionMenu="matMenu">
     <button mat-menu-item (click)="onNewFile()">
         <mat-icon>insert_drive_file</mat-icon>
         <span>New File</span>
@@ -56,5 +62,16 @@
     <button mat-menu-item (click)="pasteFile()" [disabled]="copyCutFileAction == null">
         <mat-icon>content_paste</mat-icon>
         <span>Paste</span>
+    </button>
+</mat-menu>
+
+<mat-menu #viewTypeMenu="matMenu">
+    <button mat-menu-item (click)="onSelectListView()">
+        <mat-icon>list</mat-icon>
+        <span>as List</span>
+    </button>
+    <button mat-menu-item (click)="onSelectIconView()">
+        <mat-icon>view_comfy</mat-icon>
+        <span>as Icons</span>
     </button>
 </mat-menu>
