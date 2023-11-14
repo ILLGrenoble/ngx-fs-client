@@ -1,6 +1,6 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {FileUpload, UploadData} from "../../../models";
+import {FileStats, FileSystemAction, FileUpload, UploadData, UploadProgress} from "../../../models";
 import {
     catchError,
     concatMap,
@@ -9,7 +9,7 @@ import {
     map,
     of,
     Subject,
-    takeUntil,
+    takeUntil, tap,
 } from 'rxjs';
 import {NgxFileSystemService} from "../../../services";
 
@@ -67,6 +67,8 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
             this._fileUploads.push(fileUpload);
             fileUploads.push(fileUpload)
         }
+
+        let currentUpload: UploadProgress = null;
         from(fileUploads).pipe(
             concatMap(fileUpload => {
                 const chunks = fileUpload.createChunks();
@@ -87,10 +89,13 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
                             concatMap(uploadProgress => {
                                 if (uploadProgress.fileStats) {
                                     fileUploadChunk.progress = 100;
+
                                     if (fileUpload.progress === 100) {
+                                        currentUpload = null;
                                         return of({fileUpload, fileStats: uploadProgress.fileStats})
 
                                     } else {
+                                        currentUpload = uploadProgress;
                                         return EMPTY;
                                     }
                                 } else {
@@ -110,9 +115,17 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
             }),
             takeUntil(this._destroy$),
 
-        ).subscribe(({fileUpload, fileStats}) => {
-            this._completed = this._fileUploads.find(fileUpload => fileUpload.progress !== 100) == null;
+        ).subscribe({
+            next: ({fileUpload, fileStats}) => {
+                this._completed = this._fileUploads.find(fileUpload => fileUpload.progress !== 100) == null;
+            },
+            complete: () => {
+                if (this._cancelled && currentUpload) {
+                    this._fileSystemService.deleteFileOrFolder(currentUpload.fileStats).subscribe(_ => {})
+                }
+            }
         });
+
     }
 
 
@@ -137,7 +150,7 @@ export class FileUploadDialogComponent implements OnInit, OnDestroy {
     }
 
     public onCancel(): void {
-        this._destroy$.next(true);
         this._cancelled = true;
+        this._destroy$.next(true);
     }
 }

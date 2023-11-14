@@ -407,7 +407,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     }
 
     downloadFile(): void {
-
+        this.fileSystemAction.emit(new FileSystemAction({fileStats: this.selectedFile, type: 'DOWNLOAD'}));
     }
 
     deleteFile(): void {
