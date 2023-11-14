@@ -120,10 +120,15 @@ export class NgxFileManagerComponent implements OnInit, OnDestroy {
 
     set viewType(value: ViewType) {
         this._viewType = value;
+        localStorage.setItem('ngx-fs-client__view_type', `${value}`);
     }
 
     constructor(private _fileSystemServiceFactory: NgxFileSystemServiceFactory,
                 private _dialog: MatDialog) {
+
+        if (localStorage.getItem('ngx-fs-client__view_type')) {
+            this.viewType = +localStorage.getItem('ngx-fs-client__view_type');
+        }
     }
 
     ngOnInit(): void {
