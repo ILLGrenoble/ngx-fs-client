@@ -19,6 +19,7 @@ It has been built using Angular 16.0.0+ and uses Angular Material for the compon
 - Cut/Copy/Delete actions
 - Create new files and folders
 - Rename files and folders
+- View as icons or list
 
 # Installation
 
