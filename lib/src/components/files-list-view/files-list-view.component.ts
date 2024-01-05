@@ -80,7 +80,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     @Input()
     set directoryContent(content: DirectoryContent) {
         this._directoryContent = content;
-        setTimeout(() => this.setTableResize(this.matTableRef.nativeElement.clientWidth), 20)
+        setTimeout(() => this.setTableResize(this.matTableRef.nativeElement.clientWidth), 100)
     }
 
     @Input()

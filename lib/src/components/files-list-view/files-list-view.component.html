@@ -16,7 +16,7 @@
         <div *ngIf="directoryContentLoading" class="ngx-fs-files-list-view-loading">
             <mat-spinner></mat-spinner>
         </div>
-        <table mat-table [dataSource]="items" class="mat-elevation-z0">
+        <table *ngIf="!directoryContentLoading" mat-table [dataSource]="items" class="mat-elevation-z0">
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-header-cell">
                     <div class="ngx-fs-files-list-view-table-header-cell-inner">
