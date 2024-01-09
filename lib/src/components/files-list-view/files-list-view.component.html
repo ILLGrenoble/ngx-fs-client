@@ -16,16 +16,14 @@
         <div *ngIf="directoryContentLoading" class="ngx-fs-files-list-view-loading">
             <mat-spinner></mat-spinner>
         </div>
-        <table *ngIf="!directoryContentLoading" mat-table [dataSource]="items" class="mat-elevation-z0">
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z0" matSort [matSortDisabled]="!sortEnabled" [ngClass]="{'ngx-fs-hidden': directoryContentLoading}" (contentChanged)="setTableResize()">
             <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-header-cell">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="ngx-fs-files-list-view-table-header-cell-header">
                     <div class="ngx-fs-files-list-view-table-header-cell-inner">
                         <div class="ngx-fs-files-list-view-table-header-cell-name">
-                            <div style="margin-left: 40px">
+                            <div style="margin-left: 30px">
                                 Name
                             </div>
-                        </div>
-                        <div class="ngx-fs-files-list-view-table-resize-handle" (mousedown)="onResizeColumn($event, 0)">
                         </div>
                     </div>
                 </th>
@@ -69,12 +67,12 @@
             </ng-container>
 
             <ng-container matColumnDef="lastModified">
-                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-cell">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="ngx-fs-files-list-view-table-cell-header">
                     <div class="ngx-fs-files-list-view-table-header-cell-inner">
+                        <div class="ngx-fs-files-list-view-table-resize-handle" (mousedown)="onResizeColumn($event, 0)" (mouseover)="disableSort()" (mouseleave)="enableSort()">
+                        </div>
                         <div class="ngx-fs-files-list-view-table-header-cell-name">
                             Date modified
-                        </div>
-                        <div class="ngx-fs-files-list-view-table-resize-handle" (mousedown)="onResizeColumn($event, 1)">
                         </div>
                     </div>
                 </th>
@@ -90,8 +88,10 @@
             </ng-container>
 
             <ng-container matColumnDef="size">
-                <th mat-header-cell *matHeaderCellDef class="ngx-fs-files-list-view-table-cell">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="ngx-fs-files-list-view-table-cell-header">
                     <div class="ngx-fs-files-list-view-table-header-cell-inner">
+                        <div class="ngx-fs-files-list-view-table-resize-handle" (mousedown)="onResizeColumn($event, 1)" (mouseover)="disableSort()" (mouseleave)="enableSort()">
+                        </div>
                         <div class="ngx-fs-files-list-view-table-header-cell-name">
                             Size
                         </div>

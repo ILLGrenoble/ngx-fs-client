@@ -21,8 +21,9 @@ import {
 import {MatDialog} from "@angular/material/dialog";
 import {MatMenuTrigger} from "@angular/material/menu";
 import { DndDropEvent } from 'ngx-drag-drop';
-import {MatTable} from "@angular/material/table";
+import {MatTable, MatTableDataSource} from "@angular/material/table";
 import {DownloadFileDialogComponent} from "../dialogs";
+import {MatSort, Sort} from "@angular/material/sort";
 
 @Component({
     selector: 'files-list-view',
@@ -31,7 +32,7 @@ import {DownloadFileDialogComponent} from "../dialogs";
     encapsulation: ViewEncapsulation.None,
     host: { class: 'ngx-fs-files-list-view-component'},
 })
-export class FilesListViewComponent implements OnInit, OnDestroy {
+export class FilesListViewComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private _columns = [
         {field: 'name', width: 50},
@@ -54,9 +55,17 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     @ViewChild(MatTable, { read: ElementRef })
     private matTableRef: ElementRef;
 
+    @ViewChild(MatSort)
+    private _sort: MatSort;
+    private _sortEnabled = true;
+    private _enableSortTimerId: any;
+
+    private _dataSource: MatTableDataSource<FileStats>;
+
     public contextMenuPosition = { x: '0px', y: '0px' };
 
     private _directoryContent: DirectoryContent;
+    private _items: FileStats[];
 
     private _selectedFile: FileStats;
     private _renameInProgress: FileStats;
@@ -80,7 +89,11 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     @Input()
     set directoryContent(content: DirectoryContent) {
         this._directoryContent = content;
-        setTimeout(() => this.setTableResize(this.matTableRef.nativeElement.clientWidth), 100)
+        this.items = [];
+        setTimeout(() => {
+            this.items = content?.content;
+            this.setTableResize()
+        }, 100)
     }
 
     @Input()
@@ -139,8 +152,8 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     @Output()
     renameInProgressChange = new EventEmitter<FileStats>();
 
-    get items(): FileStats[] {
-        return this.directoryContent ? this.directoryContent.content : [];
+    get dataSource(): MatTableDataSource<FileStats> {
+        return this._dataSource;
     }
 
     get acceptDrop(): boolean {
@@ -153,6 +166,15 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
 
     set fileNameEdit(value: string) {
         this._fileNameEdit = value;
+    }
+
+    get sortEnabled(): boolean {
+        return this._sortEnabled && !this._resizeInProgress;
+    }
+
+    set items(items: FileStats[]) {
+        this._items = this._sortContent(items, this._sort);
+        this._dataSource = new MatTableDataSource<FileStats>(this._items);
     }
 
     constructor(private _dialog: MatDialog,
@@ -174,7 +196,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
             } else if (event.type === 'COPIED') {
                 this.selectedFile = event.fileStats;
             }
-        })
+        });
     }
 
     ngOnDestroy(): void {
@@ -182,7 +204,29 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         this._destroy$.unsubscribe();
     }
 
-    setTableResize(tableWidth: number) {
+    ngAfterViewInit() {
+        this._sort.sortChange.subscribe(() => {
+           this.items = this._directoryContent?.content;
+        });
+    }
+
+    enableSort() {
+        this._enableSortTimerId = setTimeout(() => this._sortEnabled = true, 400);
+    }
+
+    disableSort() {
+        if (this._enableSortTimerId) {
+            clearTimeout(this._enableSortTimerId);
+            this._enableSortTimerId = null;
+        }
+        this._sortEnabled = false;
+    }
+
+    setTableResize() {
+        if (!this.matTableRef) {
+            return;
+        }
+        const tableWidth = this.matTableRef.nativeElement.clientWidth
         let totalWidth = this._columns.reduce((sum, column) => {
             return sum + column.width;
         }, 0);
@@ -197,8 +241,9 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         this._currentResizeIndex = index;
         this._resizeInProgress = true;
         this._resizeStartX = event.pageX;
-        this._resizeStartWidth = event.target.parentElement.clientWidth;
+        this._resizeStartWidth = this._columns[index].width;
         event.preventDefault();
+        event.stopPropagation();
         this.mouseMove(index);
     }
 
@@ -207,6 +252,8 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
             'document',
             'mousemove',
             (event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 if (this._resizeInProgress && event.buttons) {
                     const dx = event.pageX - this._resizeStartX;
                     const width = this._resizeStartWidth + dx;
@@ -221,6 +268,8 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
             'document',
             'mouseup',
             (event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 if (this._resizeInProgress) {
                     this._resizeInProgress = false;
                     this._currentResizeIndex = -1;
@@ -370,11 +419,7 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
     }
 
     onDragOver(event: DragEvent): void {
-        if (event.dataTransfer.types.length === 1 && event.dataTransfer.types[0] === 'Files') {
-            this._acceptDrop = true;
-        } else {
-            this._acceptDrop = false;
-        }
+        this._acceptDrop = event.dataTransfer.types.length === 1 && event.dataTransfer.types[0] === 'Files';
     }
 
     onDropOverFolder(event: DndDropEvent, folder: FileStats): void {
@@ -428,5 +473,28 @@ export class FilesListViewComponent implements OnInit, OnDestroy {
         if (this.copyCutFileAction != null) {
             this.copyCutFileActionChange.emit(new CopyCutFileAction({fileStats: this.directoryContent.stats, type: 'PASTE'}));
         }
+    }
+
+    private _sortContent(content: FileStats[], sort?: Sort): FileStats[] {
+        if (content == null) {
+            return [];
+        }
+
+        if (sort && sort.active && sort.direction) {
+            if (sort.active === 'name') {
+                return [...content].sort((a, b) => sort.direction === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+            } else if (sort.active === 'lastModified') {
+                return [...content].sort((a, b) => sort.direction === 'asc' ? new Date(a.last_modified).getTime() - new Date(b.last_modified).getTime() : new Date(b.last_modified).getTime() - new Date(a.last_modified).getTime());
+            } else if (sort.active === 'size') {
+                return [...content].sort((a, b) => {
+                    const aSize = a.type === 'directory' ? 0 : a.size;
+                    const bSize = b.type === 'directory' ? 0 : b.size;
+                    return sort.direction === 'asc' ? aSize - bSize : bSize - aSize
+                });
+            } else {
+                return [...content];
+            }
+        }
+        return [...content];
     }
 }

@@ -7,7 +7,7 @@
         "start": "ng serve --proxy-config proxy.conf.json",
         "build:lib": "ng build lib --configuration production",
         "postbuild:lib": "cp ./README.md ./dist/lib && cp ./LICENSE ./dist/lib",
-        "watch": "ng build --watch --configuration development",
+        "watch:lib": "ng build lib --watch --configuration development",
         "publish:lib": "npm run build:lib && npm publish ./dist/lib --access public"
     },
     "repository": {

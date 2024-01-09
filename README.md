@@ -26,7 +26,7 @@ It has been built using Angular 16.0.0+ and uses Angular Material for the compon
 To use ngx-fs-client in your project, install it via npm:
 
 ```
-npm i @illgrenoble/ngx-remote-desktop --save
+npm i @illgrenoble/ngx-fs-client --save
 ```
 
 You also need to install the drag-and-drop peer dependency:

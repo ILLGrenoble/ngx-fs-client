@@ -83,8 +83,12 @@ tr.mat-mdc-row, tr.mat-mdc-header-row {
     padding: 0!important;
 }
 
-.ngx-fs-files-list-view-table-cell {
+.ngx-fs-files-list-view-table-cell-header {
     padding: 0 4px!important;
+}
+
+.ngx-fs-files-list-view-table-cell {
+    padding: 0 4px 0 10px!important;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -95,6 +99,7 @@ tr.mat-mdc-row, tr.mat-mdc-header-row {
         background-color: #e5e5e5 !important;
     }
 }
+
 .ngx-fs-files-list-view-table-header-cell-inner {
     display: flex;
     flex-direction: row;
@@ -118,6 +123,7 @@ table th:hover .ngx-fs-files-list-view-table-resize-handle {
     width: 2px;
     cursor: col-resize;
     opacity: 0.2;
+    margin-right: 4px;
 }
 
 .ngx-fs-file-list-view-name-view {
